@@ -26,7 +26,7 @@ export default {
   },
   data() {
     return {
-      title: '莫高管理系统',
+      title: '尾矿库管理系统',
       logo: logoImg
     }
   }

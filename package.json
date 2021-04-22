@@ -1,8 +1,8 @@
 {
   "name": "mogao",
   "version": "2.3.0",
-  "description": "莫高管理系统",
-  "author": "莫高",
+  "description": "尾矿库管理系统",
+  "author": "万桥信息技术有限公司",
   "license": "MIT",
   "scripts": {
     "dev": "vue-cli-service serve --open",
