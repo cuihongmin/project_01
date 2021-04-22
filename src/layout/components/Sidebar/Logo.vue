@@ -15,6 +15,7 @@
 
 <script>
 import logoImg from '@/assets/logo/logo.png'
+import { getTitle } from "@/api/login";
 
 export default {
   name: 'SidebarLogo',
@@ -26,9 +27,14 @@ export default {
   },
   data() {
     return {
-      title: '尾矿库管理系统',
+      title:  "尾矿库监测系统",
       logo: logoImg
     }
+  },
+  created() {
+    getTitle().then(res => {
+      this.title = res.msg
+    })
   }
 }
 </script>

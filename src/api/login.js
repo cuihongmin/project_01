@@ -38,3 +38,9 @@ export function getCodeImg() {
     method: 'get'
   })
 }
+export function getTitle() {
+  return request({
+    url: '/system/config/configKey/systemName',
+    method:"get"
+  })
+}
