@@ -21,3 +21,12 @@ selenium-debug.log
 
 package-lock.json
 yarn.lock
+
+# 将.history加入，不能上传,(vscode插件)
+node_modules
+dist
+weapp
+.history
+.DS_Store
+
+.idea
