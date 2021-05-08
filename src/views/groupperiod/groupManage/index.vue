@@ -64,20 +64,10 @@
           v-hasPermi="['groupperiod:groupManage:remove']"
         >删除</el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['groupperiod:groupManage:export']"
-        >导出</el-button>
-      </el-col>
     </el-row>
 
     <el-table v-loading="loading" :data="groupManageList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="端口" align="center" prop="id" />
       <el-table-column label="群组名称" align="center" prop="name" />
       <el-table-column label="ip地址" align="center" prop="ip" />
       <el-table-column label="端口" align="center" prop="port" />
@@ -101,7 +91,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -121,6 +111,9 @@
         </el-form-item>
         <el-form-item label="端口" prop="port">
           <el-input v-model="form.port" placeholder="请输入端口" />
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
