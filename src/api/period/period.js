@@ -15,3 +15,11 @@ export function classifyCollectTimeUnitList(query) {
     method: 'get',
   })
 }
+// 修改传感器状态接口
+export function classifyStateEdit(query) {
+  return request({
+    url: 'sensorclassify/classify/state/edit',
+    method: 'put',
+    params: query
+  })
+}

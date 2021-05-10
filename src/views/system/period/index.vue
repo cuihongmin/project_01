@@ -36,6 +36,7 @@
                   <el-option
                     v-for="dict in typeOptions"
                     :key="dict.dictValue"
+                    :value="dict.dictValue"
                     :label="dict.dictLabel"
                   >
                   </el-option>
@@ -50,7 +51,7 @@
             <el-table-column fixed="right" label="操作" width="160">
               <template slot-scope="scope">
                 <el-button
-                  @click="handleClick(scope.row)"
+                  @click="handleChangeState(scope.row)"
                   :type="scope.row.state == '已启用' ? 'danger' : 'primary'"
                   size="small"
                   >{{
@@ -74,7 +75,11 @@
 
 <script>
 import { getServer } from "@/api/monitor/server";
-import { listPeriod, classifyCollectTimeUnitList } from "@/api/period/period";
+import {
+  listPeriod,
+  classifyCollectTimeUnitList,
+  classifyStateEdit,
+} from "@/api/period/period";
 export default {
   data() {
     return {
@@ -98,20 +103,41 @@ export default {
   },
   mounted() {
     this.getlistPeriod();
+    // 查询数据字典
     this.getDicts("sys_collect_time_unit").then((response) => {
       this.typeOptions = response.data;
     });
   },
   methods: {
+    // 调查询列表接口
     getlistPeriod() {
+      // this.loading.close();
       listPeriod(this.queryParams).then((response) => {
         this.tableData = response.rows;
         console.log(this.tableData);
+        this.loading.close();
+      });
+    },
+
+    getCollectTimeUnitList() {
+      classifyCollectTimeUnitList().then((response) => {
+        this.list = response.data;
+        console.log(this.list);
+
         // this.loading.close();
       });
     },
-    getCollectTimeUnitList() {
-      classifyCollectTimeUnitList().then((response) => {
+    handleChangeState(row) {
+      this.getStateEdit(row);
+      this.getlistPeriod();
+    },
+    // 修改状态接口
+    getStateEdit(row) {
+      let params = {
+        id: row.id,
+        state: row.state,
+      };
+      classifyStateEdit(params).then((response) => {
         this.list = response.data;
         console.log(this.list);
 
