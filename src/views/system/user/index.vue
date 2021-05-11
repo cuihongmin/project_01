@@ -572,7 +572,7 @@ export default {
       const userId = row.userId || this.ids;
       getUser(userId).then(response => {
         this.form = response.data;
-        this.postOptions = response.posts;
+        this.postOptions = response.post;
         this.roleOptions = response.roles;
         this.form.postIds = response.postIds;
         this.form.roleIds = response.roleIds;
