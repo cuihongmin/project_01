@@ -1,50 +1,64 @@
 <template>
   <div class="app-container">
     <el-row>
-      <el-col :span="12" class="card-box">
+      <el-col :span="24" class="card-box">
         <el-card>
           <div slot="header">
             <span><i class="el-icon-s-grid"></i>传感器</span>
           </div>
           <el-table
             :data="tableData"
+            v-loading="loading"
             border
             :show-header="hiddenTableHeader"
             style="width: 100%"
           >
-            <el-table-column prop="name" label="姓名" width="90">
+            <el-table-column prop="name" label="姓名" width="160">
             </el-table-column>
-            <el-table-column prop="num" label="数量" width="90">
+            <el-table-column prop="dataCollectCycle" label="数量" width="160">
               <template slot-scope="scope">
                 <el-input
-                  :value="scope.row.num"
+                  v-model="scope.row.dataCollectCycle"
                   placeholder="请输入内容"
                 ></el-input>
               </template>
             </el-table-column>
-            <el-table-column prop="val" label="单位" width="90">
+            <el-table-column
+              prop="collectTimeUnit"
+              :formatter="statusFormat"
+              label="单位"
+              width="160"
+            >
               <template slot-scope="scope">
-                <el-select :value="scope.row.val" placeholder="请选择文章标签">
-                  <el-option value="时">时 </el-option>
-                  <el-option value="分">分 </el-option>
-                  <el-option value="秒">秒 </el-option>
+                <el-select
+                  v-model="scope.row.collectTimeUnit"
+                  placeholder="请选择文章标签"
+                >
+                  <el-option
+                    v-for="dict in typeOptions"
+                    :key="dict.dictValue"
+                    :value="dict.dictValue"
+                    :label="dict.dictLabel"
+                  >
+                  </el-option>
                 </el-select>
               </template>
             </el-table-column>
-            <el-table-column prop="state" label="状态" width="90">
+            <el-table-column prop="state" label="状态" width="160">
+              <template slot-scope="scope">{{
+                scope.row.state == 0 ? "未启用" : "已启用"
+              }}</template>
             </el-table-column>
             <el-table-column fixed="right" label="操作" width="160">
               <template slot-scope="scope">
                 <el-button
-                  @click="handleClick(scope.row)"
-                  :type="scope.row.state == '已启用' ? 'danger' : 'primary'"
+                  @click="handleChangeState(scope.row)"
+                  :type="scope.row.state == 1 ? 'danger' : 'primary'"
                   size="small"
-                  >{{
-                    scope.row.state == "已启用" ? "禁用" : "启用"
-                  }}</el-button
+                  >{{ scope.row.state == 1 ? "禁用" : "启用" }}</el-button
                 >
                 <el-button
-                  @click="handleClick(scope.row)"
+                  @click="handleSave(scope.row)"
                   type="primary"
                   size="small"
                   >保存</el-button
@@ -54,141 +68,114 @@
           </el-table>
         </el-card>
       </el-col>
-
-      <el-col :span="12" class="card-box">
-        <el-card>
-          <div slot="header">
-            <span><i class="el-icon-s-data">其他设备</i></span>
-          </div>
-          <div class="el-table el-table--enable-row-hover el-table--medium">
-            <table cellspacing="0" style="width: 100%">
-              <thead>
-                <tr>
-                  <th class="is-leaf"><div class="cell">属性</div></th>
-                  <th class="is-leaf"><div class="cell">内存</div></th>
-                  <th class="is-leaf"><div class="cell">JVM</div></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><div class="cell">总内存</div></td>
-                  <td>
-                    <div class="cell"></div>
-                  </td>
-                  <td>
-                    <div class="cell"></div>
-                  </td>
-                </tr>
-                <tr>
-                  <td><div class="cell">已用内存</div></td>
-                  <td>
-                    <div class="cell"></div>
-                  </td>
-                  <td>
-                    <div class="cell"></div>
-                  </td>
-                </tr>
-                <tr>
-                  <td><div class="cell">剩余内存</div></td>
-                  <td>
-                    <div class="cell"></div>
-                  </td>
-                  <td>
-                    <div class="cell"></div>
-                  </td>
-                </tr>
-                <tr>
-                  <td><div class="cell">使用率</div></td>
-                  <td>
-                    <div
-                      class="cell"
-                      v-if="server.mem"
-                      :class="{ 'text-danger': server.mem.usage > 80 }"
-                    >
-                      {{ server.mem.usage }}%
-                    </div>
-                  </td>
-                  <td>
-                    <div
-                      class="cell"
-                      v-if="server.jvm"
-                      :class="{ 'text-danger': server.jvm.usage > 80 }"
-                    >
-                      {{ server.jvm.usage }}%
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </el-card>
-      </el-col>
     </el-row>
   </div>
 </template>
 
 <script>
-import { getServer } from "@/api/monitor/server";
+import {
+  listPeriod,
+  classifyCollectTimeUnitList,
+  classifyStateEdit,
+  classify,
+} from "@/api/period/period";
 export default {
   data() {
     return {
+      // 遮罩层
+      loading: true,
+      // 查询参数
+      queryParams: {
+        // pageNum: 1,
+        // pageSize: 10,
+        // orderByColumn: undefined,
+        // isAsc: undefined,
+      },
       hiddenTableHeader: false,
-      tableData: [
-        {
-          name: "GNSS位移",
-          num: "20",
-          val: "时",
-          state: "已启用",
-        },
-        {
-          name: "GNSS位移",
-          num: "20",
-          val: "时",
-          state: "已启用",
-        },
-        {
-          name: "GNSS位移",
-          num: "20",
-          val: "时",
-          state: "已启用",
-        },
-        {
-          name: "GNSS位移",
-          num: "20",
-          val: "时",
-          state: "已启用",
-        },
-        {
-          name: "GNSS位移",
-          num: "20",
-          val: "时",
-          state: "已启用",
-        },
-        {
-          name: "王小虎",
-          num: "20",
-          val: "时",
-          state: "已启用",
-        },
-        {
-          name: "王小虎",
-          num: "20",
-          val: "时",
-          state: "未启用",
-        },
-      ],
+      //查询列表数据
+      tableData: [],
       server: [],
+      list: [],
+      // 类型数据字典
+      typeOptions: [],
     };
   },
+  mounted() {
+    this.getlistPeriod();
+    // 查询数据字典
+    this.getDicts("sys_collect_time_unit").then((response) => {
+      this.typeOptions = response.data;
+    });
+  },
   methods: {
-    getList() {
-      getServer().then((response) => {
-        this.server = response.data;
-        this.loading.close();
+    // 调查询列表接口
+    getlistPeriod() {
+      this.loading = true;
+      listPeriod(this.queryParams).then((response) => {
+        this.tableData = response.rows;
+        console.log(this.tableData);
+        this.loading = false;
       });
     },
-    handleClick(row) {
+
+    getCollectTimeUnitList() {
+      classifyCollectTimeUnitList().then((response) => {
+        this.list = response.data;
+        console.log(this.list);
+
+        // this.loading.close();
+      });
+    },
+    // 点击修改传感器状态接口
+    handleChangeState(row) {
+      this.getStateEdit(row);
+    },
+    // 修改状态接口
+    getStateEdit(row) {
+      if (row.state == 0) {
+        let params = {
+          id: row.id,
+          status: 1,
+        };
+        classifyStateEdit(params).then((response) => {
+          this.getlistPeriod();
+
+          // this.loading.close();
+        });
+      } else {
+        let params = {
+          id: row.id,
+          status: 0,
+        };
+        classifyStateEdit(params).then((response) => {
+          this.getlistPeriod();
+        });
+      }
+    },
+    // 点击保存按钮
+    handleSave(row) {
       console.log(row);
+      this.putClassify(row);
+    },
+    // 调查询列表接口
+    putClassify(row) {
+      this.loading = true;
+      let ipt = {
+        id: row.id,
+        collectTimeUnit: row.collectTimeUnit,
+        dataCollectCycle: row.dataCollectCycle,
+      };
+      classify(ipt).then((response) => {
+        this.getlistPeriod();
+        this.msgSuccess("保存成功", 2);
+        this.tableData = response.rows;
+        console.log(this.tableData);
+        this.loading = false;
+      });
+    },
+    // 字典状态字典翻译
+    statusFormat(row, column) {
+      return this.selectDictLabel(this.typeOptions, row.status);
     },
   },
 };
