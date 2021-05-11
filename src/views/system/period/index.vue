@@ -8,6 +8,7 @@
           </div>
           <el-table
             :data="tableData"
+            v-loading="loading"
             border
             :show-header="hiddenTableHeader"
             style="width: 100%"
@@ -52,14 +53,12 @@
               <template slot-scope="scope">
                 <el-button
                   @click="handleChangeState(scope.row)"
-                  :type="scope.row.state == '已启用' ? 'danger' : 'primary'"
+                  :type="scope.row.state == 1 ? 'danger' : 'primary'"
                   size="small"
-                  >{{
-                    scope.row.state == "已启用" ? "禁用" : "启用"
-                  }}</el-button
+                  >{{ scope.row.state == 1 ? "禁用" : "启用" }}</el-button
                 >
                 <el-button
-                  @click="handleClick(scope.row)"
+                  @click="handleSave(scope.row)"
                   type="primary"
                   size="small"
                   >保存</el-button
@@ -74,11 +73,11 @@
 </template>
 
 <script>
-import { getServer } from "@/api/monitor/server";
 import {
   listPeriod,
   classifyCollectTimeUnitList,
   classifyStateEdit,
+  classify,
 } from "@/api/period/period";
 export default {
   data() {
@@ -111,11 +110,11 @@ export default {
   methods: {
     // 调查询列表接口
     getlistPeriod() {
-      // this.loading.close();
+      this.loading = true;
       listPeriod(this.queryParams).then((response) => {
         this.tableData = response.rows;
         console.log(this.tableData);
-        this.loading.close();
+        this.loading = false;
       });
     },
 
@@ -127,25 +126,52 @@ export default {
         // this.loading.close();
       });
     },
+    // 点击修改传感器状态接口
     handleChangeState(row) {
       this.getStateEdit(row);
-      this.getlistPeriod();
     },
     // 修改状态接口
     getStateEdit(row) {
-      let params = {
-        id: row.id,
-        state: row.state,
-      };
-      classifyStateEdit(params).then((response) => {
-        this.list = response.data;
-        console.log(this.list);
+      if (row.state == 0) {
+        let params = {
+          id: row.id,
+          status: 1,
+        };
+        classifyStateEdit(params).then((response) => {
+          this.getlistPeriod();
 
-        // this.loading.close();
-      });
+          // this.loading.close();
+        });
+      } else {
+        let params = {
+          id: row.id,
+          status: 0,
+        };
+        classifyStateEdit(params).then((response) => {
+          this.getlistPeriod();
+        });
+      }
     },
-    handleClick(row) {
+    // 点击保存按钮
+    handleSave(row) {
       console.log(row);
+      this.putClassify(row);
+    },
+    // 调查询列表接口
+    putClassify(row) {
+      this.loading = true;
+      let ipt = {
+        id: row.id,
+        collectTimeUnit: row.collectTimeUnit,
+        dataCollectCycle: row.dataCollectCycle,
+      };
+      classify(ipt).then((response) => {
+        this.getlistPeriod();
+        this.msgSuccess("保存成功", 2);
+        this.tableData = response.rows;
+        console.log(this.tableData);
+        this.loading = false;
+      });
     },
     // 字典状态字典翻译
     statusFormat(row, column) {

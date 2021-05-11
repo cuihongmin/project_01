@@ -18,8 +18,16 @@ export function classifyCollectTimeUnitList(query) {
 // 修改传感器状态接口
 export function classifyStateEdit(query) {
   return request({
-    url: 'sensorclassify/classify/state/edit',
+    url: '/sensorclassify/classify/state/edit',
     method: 'put',
     params: query
+  })
+}
+// 保存传感器数据接口
+export function classify(data) {
+  return request({
+    url: '/sensorclassify/classify',
+    method: 'put',
+    data: data
   })
 }
