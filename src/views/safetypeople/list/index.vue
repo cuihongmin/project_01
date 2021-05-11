@@ -80,7 +80,7 @@
           <el-table-column label="序号" align="center" prop="order" />
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column label="姓名" align="center" prop="name" />
-          <el-table-column label="关联账号id" align="center" prop="relevanceUserId" />
+<!--          <el-table-column label="关联账号id" align="center" prop="relevanceUserId" />-->
           <el-table-column label="安全编号" align="center" prop="code" />
           <el-table-column label="部门" align="center" prop="deptName" />
           <el-table-column label="职务" align="center" prop="positionName" />
@@ -261,6 +261,13 @@ export default {
     this.getList();
     this.getTreeselect();
 
+    getUser().then(response => {
+      this.postOptions = response.posts;
+    });
+    listUser().then (response => {
+      this.users = response.rows;
+    });
+
   },
   methods: {
     /** 查询安全人员列表 */
@@ -330,14 +337,12 @@ export default {
     },
     /** 新增按钮操作 */
     handleAdd() {
-      getUser().then(response => {
+     /* getUser().then(response => {
         this.postOptions = response.posts;
       });
       listUser().then (response => {
         this.users = response.rows;
-        console.log("aaaa", this.users);
-      });
-      console.log("fsdfsdfsdfsdfsd");
+      });*/
       this.reset();
       this.getTreeselect();
       this.open = true;
@@ -347,6 +352,7 @@ export default {
     handleUpdate(row) {
       this.reset();
       this.getTreeselect();
+
       const id = row.id || this.ids
       getList(id).then(response => {
         this.form = response.data;
