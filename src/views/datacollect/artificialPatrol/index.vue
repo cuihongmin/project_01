@@ -136,7 +136,14 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="巡检类别" prop="patrolTypeId">
-              <el-input v-model="form.patrolTypeId" placeholder="请输入巡检类别" />
+              <el-select v-model="form.patrolTypeId" placeholder="请选择巡检类别" clearable size="small">
+                <el-option
+                  v-for="dict in patrolTypeOptions"
+                  :key="dict.dictValue"
+                  :label="dict.dictLabel"
+                  :value="dict.dictValue"
+                />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -146,7 +153,14 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="安全评估" prop="safetyAssessment">
-              <el-input v-model="form.safetyAssessment" placeholder="请输入安全评估" />
+              <el-select v-model="form.safetyAssessment" placeholder="请选择安全评估" clearable size="small">
+                <el-option
+                  v-for="dict in safetyAssessmentOptions"
+                  :key="dict.dictValue"
+                  :label="dict.dictLabel"
+                  :value="dict.dictValue"
+                />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="24" style="margin-bottom: 60px">
@@ -174,17 +188,27 @@
           </el-col>
           <el-col :span="24">
             <el-form-item label="发布内容" prop="releaseContent">
-              <el-input v-model="form.releaseContent" placeholder="请输入发布内容" />
+              <el-input v-model="form.releaseContent" type="textarea" placeholder="请输入发布内容" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="状态发布" prop="stateRelease">
-              <el-input v-model="form.stateRelease" placeholder="请输入状态发布" />
+              <el-select v-model="form.stateRelease" placeholder="请选择状态发布" clearable size="small">
+                <el-option
+                  v-for="dict in stateReleaseOptions"
+                  :key="dict.dictValue"
+                  :label="dict.dictLabel"
+                  :value="dict.dictValue"
+                />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="接受人员" prop="acceptBy">
-              <el-input v-model="form.acceptBy" placeholder="请输入接受人" />
+              <el-input disabled v-model="form.acceptByName" placeholder="请选择接受人员" >
+                <el-button slot="append" icon="el-icon-user" @click="$refs.user.add(selectUser, 'getAddUser')"></el-button>
+              </el-input>
+              <el-input style="display: none" v-model="form.acceptBy" ></el-input>
             </el-form-item>
           </el-col>
         </el-row>
@@ -194,6 +218,7 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+    <userAddMultipleDialog ref="user" @getAddUser="getAddUser" />
   </div>
 </template>
 
@@ -201,10 +226,12 @@
 import { listArtificialPatrol, getArtificialPatrol, delArtificialPatrol, addArtificialPatrol, updateArtificialPatrol, exportArtificialPatrol } from "@/api/datacollect/artificialPatrol";
 import Editor from '@/components/Editor';
 import { getToken } from "@/utils/auth";
+import userAddMultipleDialog from "@/views/system/user/userAddMultipleDialog";
 export default {
   name: "ArtificialPatrol",
   components: {
-    Editor
+    Editor,
+    userAddMultipleDialog
   },
   data() {
     return {
@@ -249,16 +276,30 @@ export default {
         warnState: undefined,
         warnRelieveTime: undefined,
         relieveDetails: undefined,
-        relieveBy: undefined,
+        relieveBy: undefined
       },
       // 表单参数
       form: {},
       // 表单校验
       rules: {
-      }
+      },
+      selectUser: [],
+      safetyAssessmentOptions: [],
+      patrolTypeOptions: [],
+      stateReleaseOptions: []
     };
   },
   created() {
+    //加载数据字典
+    this.getDicts("patrol_safety_assessment").then(response => {
+      this.safetyAssessmentOptions = response.data;//安全评估
+    });
+    this.getDicts("patrol_type").then(response => {
+      this.patrolTypeOptions = response.data;//巡检类别
+    });
+    this.getDicts("patrol_state_release").then(response => {
+      this.stateReleaseOptions = response.data;//状态发布
+    });
     this.getList();
   },
   methods: {
@@ -335,7 +376,9 @@ export default {
         createTime: undefined,
         updateBy: undefined,
         updateTime: undefined,
-        files: []
+        files: [],
+        acceptBy: undefined,
+        acceptByName: undefined
       };
       this.fileList = []
       this.resetForm("form");
@@ -359,6 +402,7 @@ export default {
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
+      this.selectUser = [];
       this.open = true;
       this.title = "添加人工巡检登记";
     },
@@ -378,7 +422,22 @@ export default {
         // 附件赋值
         this.form.files = filesArr;
         this.fileList = filesArr
-        console.log(filesArr)
+        //接收人员回显
+        this.selectUser = [];
+        var acceptBys = '';
+        if(response.data.acceptBy != null){
+          acceptBys = response.data.acceptBy.split(',');
+        }
+        var acceptByNames = '';
+        if(response.data.acceptByName != null){
+          acceptByNames = response.data.acceptByName.split(',');
+        }
+        for(var i =0; i < principals.length; i++){
+          var user = new Object()
+          user.userId = acceptBys[i]
+          user.nickName = acceptByNames[i]
+          this.selectUser.push(user)
+        }
         this.open = true;
         this.title = "修改人工巡检登记";
       });
@@ -438,6 +497,17 @@ export default {
         }).then(response => {
           this.download(response.msg);
         }).catch(function() {});
+    },
+    getAddUser(data) {
+      this.selectUser = data
+      var userIds = ''
+      var userNames = ''
+      this.selectUser.map(item => {
+        userIds += item.userId + ','
+        userNames += item.nickName + ','
+      });
+      this.form.acceptBy = userIds.substring(0, userIds.length - 1);
+      this.form.acceptByName = userNames.substring(0, userNames.length - 1);
     }
   }
 };
