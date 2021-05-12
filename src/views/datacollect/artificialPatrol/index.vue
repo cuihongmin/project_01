@@ -81,6 +81,15 @@
           v-hasPermi="['datacollect:artificialPatrol:remove']"
         >删除</el-button>
       </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="danger"
+          icon="el-icon-unlock"
+          size="mini"
+          :disabled="multiple"
+          @click="handleJcPatrol"
+        >预警解除状态</el-button>
+      </el-col>
     </el-row>
 
     <el-table v-loading="loading" :data="artificialPatrolList" @selection-change="handleSelectionChange">
@@ -97,7 +106,7 @@
       <el-table-column label="记录时间" align="center" prop="createTime" />
       <el-table-column label="预警解除状态" align="center" prop="warnState">
         <template slot-scope="scope">
-          <span>{{ scope.row.warnState == '0' ? '未解除' : '解除' }}</span>
+          <span>{{ scope.row.warnState == '0' ? '未解除' : '已解除' }}</span>
         </template>
       </el-table-column>
       <el-table-column label="预警解除时间" align="center" prop="warnRelieveTime" width="180">
@@ -231,7 +240,56 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+    <!-- 预警状态解除对话框 -->
+    <el-dialog title="解除预警" :visible.sync="open_jc" width="600px" append-to-body>
+      <el-form ref="form_jc" :model="form_jc" :rules="rules_jc" label-width="100px">
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="预警解除时间" prop="patrolTime">
+              <el-date-picker clearable size="small" style="width: 200px"
+                              v-model="form_jc.warnRelieveTime"
+                              type="date"
+                              value-format="yyyy-MM-dd"
+                              placeholder="选择预警解除时间">
+              </el-date-picker>
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="解除预警人员" prop="relieveBy">
+              <el-input disabled v-model="form_jc.relieveByName" style="width: 200px" placeholder="请选择解除预警人员" >
+                <el-button slot="append" icon="el-icon-user" @click="$refs.user2.add(selectUser2, 'getAddUser2')"></el-button>
+              </el-input>
+              <el-input style="display: none" v-model="form_jc.relieveBy" ></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="安全评估" prop="safetyAssessment">
+              <el-select v-model="form_jc.safetyAssessment" placeholder="请选择安全评估" clearable size="small">
+                <el-option
+                  v-for="dict in safetyAssessmentOptions"
+                  :key="dict.dictValue"
+                  :label="dict.dictLabel"
+                  :value="dict.dictValue"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="解除操作情况" prop="releaseContent">
+              <el-input v-model="form_jc.relieveDetails" type="textarea" placeholder="请输入解除操作情况" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitForm_jc">保 存</el-button>
+        <el-button @click="cancel_jc">取 消</el-button>
+      </div>
+    </el-dialog>
+    <!--用户选择弹框（多选）-->
     <userAddMultipleDialog ref="user" @getAddUser="getAddUser" />
+    <!--用户选择弹框（单选）-->
+    <userAddSingleDialog ref="user2" @getAddUser="getAddUser2" />
   </div>
 </template>
 
@@ -240,11 +298,13 @@ import { listArtificialPatrol, getArtificialPatrol, delArtificialPatrol, addArti
 import Editor from '@/components/Editor';
 import { getToken } from "@/utils/auth";
 import userAddMultipleDialog from "@/views/system/user/userAddMultipleDialog";
+import userAddSingleDialog from "@/views/system/user/userAddSingleDialog";
 export default {
   name: "ArtificialPatrol",
   components: {
     Editor,
-    userAddMultipleDialog
+    userAddMultipleDialog,
+    userAddSingleDialog
   },
   data() {
     return {
@@ -252,10 +312,6 @@ export default {
         Authorization: "Bearer " + getToken()
       },
       requestApi: process.env.VUE_APP_BASE_API,
-      // 表单参数
-      form: {
-        files: []
-      },
       fileList: [],
       // 遮罩层
       loading: true,
@@ -273,6 +329,8 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      // 解除预警是否显示弹出层
+      open_jc: false,
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -296,7 +354,13 @@ export default {
       // 表单校验
       rules: {
       },
+      //  解除预警,表单参数
+      form_jc: {},
+      //  解除预警,表单校验
+      rules_jc: {
+      },
       selectUser: [],
+      selectUser2: [],
       safetyAssessmentOptions: [],
       patrolTypeOptions: [],
       stateReleaseOptions: [],
@@ -341,7 +405,7 @@ export default {
     },
     // 附件上传
     handleAvatarSuccess(res) {
-      console.log("handleAvatarSuccess res ", res);
+      // console.log("handleAvatarSuccess res ", res);
       if (res.code === 200) {
         this.fileList.push(res.data);
       } else {
@@ -380,6 +444,18 @@ export default {
     cancel() {
       this.open = false;
       this.reset();
+    },
+    // 解除预警取消按钮
+    cancel_jc() {
+      this.open_jc = false;
+      this.reset_jc();
+    },
+    /** 解除预警表单重置 */
+    reset_jc() {
+      this.form_jc = {
+
+      };
+      this.resetForm("form_jc");
     },
     // 表单重置
     reset() {
@@ -470,6 +546,15 @@ export default {
         this.title = "修改人工巡检登记";
       });
     },
+    /** 解除预警按钮 */
+    handleJcPatrol(row) {
+      this.reset_jc();
+      const id = row.id || this.ids
+      getArtificialPatrol(id).then(response => {
+        this.open_jc = true;
+        this.form_jc = response.data;
+      });
+    },
     /** 提交按钮 */
     submitForm: function() {
       this.$refs["form"].validate(valid => {
@@ -496,6 +581,20 @@ export default {
               }
             });
           }
+        }
+      });
+    },
+    /** 解除预警弹框 提交按钮 */
+    submitForm_jc: function() {
+      this.$refs["form_jc"].validate(valid => {
+        if (valid) {
+            addArtificialPatrol(this.form).then(response => {
+              if (response.code === 200) {
+                this.msgSuccess("保存成功！");
+                this.open = false;
+                this.getList();
+              }
+            });
         }
       });
     },
@@ -527,6 +626,17 @@ export default {
         }).catch(function() {});
     },
     getAddUser(data) {
+      this.selectUser = data
+      var userIds = ''
+      var userNames = ''
+      this.selectUser.map(item => {
+        userIds += item.userId + ','
+        userNames += item.nickName + ','
+      });
+      this.form.acceptBy = userIds.substring(0, userIds.length - 1);
+      this.form.acceptByName = userNames.substring(0, userNames.length - 1);
+    },
+    getAddUser2(data) {
       this.selectUser = data
       var userIds = ''
       var userNames = ''
