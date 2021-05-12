@@ -2,39 +2,48 @@
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" :inline="true" label-width="68px">
       <el-form-item label="巡检时间" prop="patrolTime">
-        <el-date-picker clearable size="small" style="width: 200px"
-          v-model="queryParams.patrolTime"
-          type="date"
+        <el-date-picker
+          v-model="dateRange"
+          size="small"
+          style="width: 240px"
           value-format="yyyy-MM-dd"
-          placeholder="选择巡检时间">
-        </el-date-picker>
+          type="daterange"
+          range-separator="-"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+        ></el-date-picker>
       </el-form-item>
       <el-form-item label="巡查人员" prop="patrolPerson">
         <el-input
           v-model="queryParams.patrolPerson"
           placeholder="请输入巡查人员"
+          style="width: 140px"
           clearable
           size="small"
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="巡检类型" prop="patrolTypeId">
-        <el-input
-          v-model="queryParams.patrolTypeId"
-          placeholder="请输入巡检类别"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="巡检类别" prop="patrolTypeId">
+        <el-select v-model="queryParams.patrolTypeId" placeholder="请选择巡检类别" clearable size="small">
+          <el-option
+            v-for="dict in patrolTypeOptions"
+            :key="dict.dictValue"
+            :label="dict.dictLabel"
+            :value="dict.dictValue"
+            style="width: 140px"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="安全评估" prop="safetyAssessment">
-        <el-input
-          v-model="queryParams.safetyAssessment"
-          placeholder="请输入安全评估"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
+        <el-select v-model="queryParams.safetyAssessment" placeholder="请选择安全评估" clearable size="small">
+          <el-option
+            v-for="dict in safetyAssessmentOptions"
+            :key="dict.dictValue"
+            :label="dict.dictLabel"
+            :value="dict.dictValue"
+            style="width: 140px"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -81,12 +90,16 @@
           <span>{{ parseTime(scope.row.patrolTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="巡检类别" align="center" prop="patrolTypeId" />
-      <el-table-column label="安全评估" align="center" prop="safetyAssessment" />
-      <el-table-column label="信息状态发布" align="center" prop="stateRelease" />
+      <el-table-column label="巡检类别" align="center" prop="patrolTypeId" :formatter="patrolTypeFormat" show-overflow-tooltip/>
+      <el-table-column label="安全评估" align="center" prop="safetyAssessment" :formatter="safetyAssessmentFormat" show-overflow-tooltip/>
+      <el-table-column label="信息状态发布" align="center" prop="stateRelease" :formatter="stateReleaseFormat" show-overflow-tooltip/>
       <el-table-column label="记录人" align="center" prop="createBy" />
       <el-table-column label="记录时间" align="center" prop="createTime" />
-      <el-table-column label="预警解除状态" align="center" prop="warnState" />
+      <el-table-column label="预警解除状态" align="center" prop="warnState">
+        <template slot-scope="scope">
+          <span>{{ scope.row.warnState == '0' ? '未解除' : '解除' }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="预警解除时间" align="center" prop="warnRelieveTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.warnRelieveTime, '{y}-{m}-{d}') }}</span>
@@ -286,7 +299,9 @@ export default {
       selectUser: [],
       safetyAssessmentOptions: [],
       patrolTypeOptions: [],
-      stateReleaseOptions: []
+      stateReleaseOptions: [],
+      // 日期范围
+      dateRange: []
     };
   },
   created() {
@@ -306,11 +321,23 @@ export default {
     /** 查询人工巡检登记列表 */
     getList() {
       this.loading = true;
-      listArtificialPatrol(this.queryParams).then(response => {
+      listArtificialPatrol(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
         this.artificialPatrolList = response.rows;
         this.total = response.total;
         this.loading = false;
       });
+    },
+    // 安全评估字典翻译
+    safetyAssessmentFormat(row, column) {
+      return this.selectDictLabel(this.safetyAssessmentOptions, row.safetyAssessment);
+    },
+    // 巡检类别字典翻译
+    patrolTypeFormat(row, column) {
+      return this.selectDictLabel(this.patrolTypeOptions, row.patrolTypeId);
+    },
+    // 状态发布字典翻译
+    stateReleaseFormat(row, column) {
+      return this.selectDictLabel(this.stateReleaseOptions, row.stateRelease);
     },
     // 附件上传
     handleAvatarSuccess(res) {
@@ -390,6 +417,7 @@ export default {
     },
     /** 重置按钮操作 */
     resetQuery() {
+      this.dateRange = [];
       this.resetForm("queryForm");
       this.handleQuery();
     },
