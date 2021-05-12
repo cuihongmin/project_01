@@ -6,7 +6,7 @@ export function listUser(query) {
   return request({
     url: '/system/user/list',
     method: 'get',
-    params: query
+    params: query``
   })
 }
 
@@ -125,3 +125,30 @@ export function importTemplate() {
     method: 'get'
   })
 }
+
+// 选择用户列表
+export function selectUser(query) {
+  return request({
+    url: '/system/user/listAllUser',
+    method: 'get',
+    params: query
+  })
+}
+
+// 选择岗位用户列表
+export function selectPostUser(query) {
+  return request({
+    url: '/system/user/listPost',
+    method: 'get',
+    params: query
+  })
+}
+
+/**获取当前用户 */
+export function getCurrentUser (){
+  return request({
+    url: '/system/user/getCurrentUser',
+    method: 'get'
+  })
+}
+
