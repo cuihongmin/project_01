@@ -7,7 +7,7 @@
       label-width="68px"
     >
       <el-form-item label="所属分类">
-        <el-select v-model="form.region" placeholder="请选择活动区域">
+        <el-select v-model="form.type" placeholder="请选择活动区域">
           <el-option
             v-for="dict in warnTypeOptions"
             :key="dict.dictValue"
@@ -17,7 +17,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="预警级别">
-        <el-select v-model="form.region" placeholder="请选择活动区域">
+        <el-select v-model="form.warnLevel" placeholder="请选择活动区域">
           <el-option
             v-for="dict in warnLevelOptions"
             :key="dict.dictValue"
@@ -66,18 +66,29 @@
         align="center"
         prop="invokeTarget"
         :show-overflow-tooltip="true"
-      />
+      >
+        <template slot-scope="scope">
+          <div v-for="(val, index) in scope.row.alarmWay" :key="index">
+            <div>{{ val.name + "," }}</div>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column
         label="通知安全员"
         align="center"
-        prop="cronExpression"
         :show-overflow-tooltip="true"
         width="120"
-      />
+      >
+        <template slot-scope="scope">
+          <div v-for="(val, index) in scope.row.safetyPeople" :key="index">
+            <div>{{ val.name + "," }}</div>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column
         label="备注"
         align="center"
-        prop="cronExpression"
+        prop="remak"
         :show-overflow-tooltip="true"
         width="160"
       />
@@ -120,8 +131,16 @@
       <div class="checkbox">
         <el-checkbox label="弹窗报警" name="type"></el-checkbox>
         <el-checkbox label="声音报警" name="type"></el-checkbox>
-        <el-checkbox label="邮件报警" name="type"></el-checkbox>
-        <el-checkbox label="短信报警" name="type"></el-checkbox>
+        <el-checkbox
+          label="邮件报警"
+          :checked="this.idList.indexOf(2) != -1"
+          name="type"
+        ></el-checkbox>
+        <el-checkbox
+          label="短信报警"
+          :checked="this.idList.indexOf(1) != -1"
+          name="type"
+        ></el-checkbox>
         <el-checkbox label="电话报警" name="type"></el-checkbox>
       </div>
 
@@ -262,6 +281,8 @@ export default {
       total: 0,
       // 定时任务表格数据
       jobList: [],
+      alarList: [],
+      idList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -319,7 +340,16 @@ export default {
       this.loading = true;
       warnConfigList(this.queryParams).then((response) => {
         this.jobList = response.rows;
-        this.total = response.total;
+        this.jobList.forEach((e) => {
+          console.log(e);
+          e.alarmWay.forEach((el) => {
+            console.log(el.name);
+            this.alarList.push(el.name);
+          });
+        });
+        console.log(this.alarList);
+        // this.alarList = response.rows.alarmWay;
+        // console.log(this.alarList);
         this.loading = false;
       });
     },
@@ -335,6 +365,7 @@ export default {
     cancel() {
       this.open = false;
       this.reset();
+      // this.getList();
     },
     // 表单重置
     reset() {
@@ -390,6 +421,15 @@ export default {
     },
     /* 立即执行一次 */
     handleRun(row) {
+      this.idList = [];
+      console.log(row.alarmWay);
+      row.alarmWay.forEach((element) => {
+        console.log(element.id);
+        this.idList.push(element.id);
+      });
+      console.log(this.idList);
+      console.log(this.idList.indexOf(1), this.idList.indexOf(2));
+
       this.open = true;
     },
     /** 任务详细信息 */
