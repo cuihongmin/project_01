@@ -314,7 +314,7 @@ export default {
     },
     // 附件上传
     handleAvatarSuccess(res) {
-      // console.log("res ", res);
+      console.log("handleAvatarSuccess res ", res);
       if (res.code === 200) {
         this.fileList.push(res.data);
       } else {
@@ -432,7 +432,7 @@ export default {
         if(response.data.acceptByName != null){
           acceptByNames = response.data.acceptByName.split(',');
         }
-        for(var i =0; i < principals.length; i++){
+        for(var i =0; i < acceptBys.length; i++){
           var user = new Object()
           user.userId = acceptBys[i]
           user.nickName = acceptByNames[i]
@@ -449,7 +449,7 @@ export default {
           //附件赋值
           if (this.fileList) {
             this.form.files = JSON.stringify(this.fileList);
-            // console.log("this.form.files ", this.form.files);
+            console.log("this.form.files ", this.form.files);
           }
           if (this.form.id != undefined) {
             updateArtificialPatrol(this.form).then(response => {
