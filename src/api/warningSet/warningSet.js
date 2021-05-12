@@ -8,3 +8,17 @@ export function warnConfigList(query) {
     params: query
   })
 }
+// 查询获取人员列表
+export function safetyPeople(id) {
+  return request({
+    url: '/warn/config/'+id+'/safety/people',
+    method: 'get',
+  })
+}
+// 查询获取报警方式列表
+export function alarmWays(id) {
+  return request({
+    url: '/warn/config/'+id+'/alarm/ways',
+    method: 'get',
+  })
+}

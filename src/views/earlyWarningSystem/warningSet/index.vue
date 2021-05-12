@@ -7,7 +7,7 @@
       label-width="68px"
     >
       <el-form-item label="所属分类">
-        <el-select v-model="form.type" placeholder="请选择活动区域">
+        <el-select v-model="queryParams.type" placeholder="请选择活动区域">
           <el-option
             v-for="dict in warnTypeOptions"
             :key="dict.dictValue"
@@ -17,7 +17,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="预警级别">
-        <el-select v-model="form.warnLevel" placeholder="请选择活动区域">
+        <el-select v-model="queryParams.warnLevel" placeholder="请选择活动区域">
           <el-option
             v-for="dict in warnLevelOptions"
             :key="dict.dictValue"
@@ -128,17 +128,17 @@
       width="300px"
       append-to-body
     >
-      <div class="checkbox">
+      <div class="checkbox" v-if="alarList2">
         <el-checkbox label="弹窗报警" name="type"></el-checkbox>
         <el-checkbox label="声音报警" name="type"></el-checkbox>
         <el-checkbox
           label="邮件报警"
-          :checked="this.idList.indexOf(2) != -1"
+          :checked="alarList2.indexOf(2) > -1"
           name="type"
         ></el-checkbox>
         <el-checkbox
           label="短信报警"
-          :checked="this.idList.indexOf(1) != -1"
+          :checked="alarList2.indexOf(1) > -1"
           name="type"
         ></el-checkbox>
         <el-checkbox label="电话报警" name="type"></el-checkbox>
@@ -263,7 +263,7 @@ import {
   runJob,
   changeJobStatus,
 } from "@/api/monitor/job";
-import { warnConfigList } from "@/api/warningSet/warningSet.js";
+import { warnConfigList, alarmWays } from "@/api/warningSet/warningSet.js";
 
 export default {
   name: "Job",
@@ -282,6 +282,7 @@ export default {
       // 定时任务表格数据
       jobList: [],
       alarList: [],
+      alarList2: [],
       idList: [],
       // 弹出层标题
       title: "",
@@ -297,9 +298,8 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        jobName: undefined,
-        jobGroup: undefined,
-        status: undefined,
+        type: undefined,
+        warnLevel: undefined,
       },
       // 表单参数
       form: {},
@@ -338,18 +338,29 @@ export default {
     /** 查询定时任务列表 */
     getList() {
       this.loading = true;
+      console.log(this.queryParams);
       warnConfigList(this.queryParams).then((response) => {
         this.jobList = response.rows;
-        this.jobList.forEach((e) => {
-          console.log(e);
-          e.alarmWay.forEach((el) => {
-            console.log(el.name);
-            this.alarList.push(el.name);
-          });
+        this.loading = false;
+      });
+    },
+    /** 查询定时任务列表 */
+    getAlarmWays(row) {
+      this.loading = true;
+      alarmWays(row.id).then((response) => {
+        this.alarList2 = [];
+        this.open = true;
+        this.alarList = response.rows;
+        this.alarList.forEach((element) => {
+          console.log(element.id);
+
+          this.alarList2.push(element.id);
         });
-        console.log(this.alarList);
-        // this.alarList = response.rows.alarmWay;
-        // console.log(this.alarList);
+        console.log(this.alarList2);
+        console.log(
+          this.alarList2.indexOf(1) > -1,
+          this.alarList2.indexOf(2) > -1
+        );
         this.loading = false;
       });
     },
@@ -421,16 +432,17 @@ export default {
     },
     /* 立即执行一次 */
     handleRun(row) {
-      this.idList = [];
-      console.log(row.alarmWay);
-      row.alarmWay.forEach((element) => {
-        console.log(element.id);
-        this.idList.push(element.id);
-      });
-      console.log(this.idList);
-      console.log(this.idList.indexOf(1), this.idList.indexOf(2));
+      // this.idList = [];
+      // console.log(row.alarmWay);
+      // row.alarmWay.forEach((element) => {
+      //   console.log(element.id);
+      //   this.idList.push(element.id);
+      // });
+      // console.log(this.idList);
+      // console.log(this.idList.indexOf(1), this.idList.indexOf(2));
 
-      this.open = true;
+      // this.open = true;
+      this.getAlarmWays(row);
     },
     /** 任务详细信息 */
     handleView(row) {
