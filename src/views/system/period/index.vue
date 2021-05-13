@@ -149,6 +149,7 @@ export default {
         };
         classifyStateEdit(params).then((response) => {
           this.getlistPeriod();
+          // this.$forceUpdate();
         });
       }
     },

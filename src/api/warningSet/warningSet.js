@@ -22,3 +22,19 @@ export function alarmWays(id) {
     method: 'get',
   })
 }
+// 查询获取报警方式列表
+export function publishfeedbackAlarmwayList(query) {
+  return request({
+    url: '/publishfeedback/alarmway/list',
+    method: 'get',
+    params: query
+  })
+}
+// 查询获取报警方式列表
+export function safetyPeopleSave(query) {
+  return request({
+    url: '/warn/config/'+id+'/safety/people',
+    method: 'put',
+    params: query
+  })
+}
