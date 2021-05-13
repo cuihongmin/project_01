@@ -115,7 +115,7 @@
         </template>
       </el-table-column>
       <el-table-column label="解除人" align="center" prop="relieveByName" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" width="200" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             size="mini"
@@ -131,6 +131,12 @@
             @click="handleDelete(scope.row)"
             v-hasPermi="['datacollect:artificialPatrol:remove']"
           >删除</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-view"
+            @click="$refs.detial.open(scope.row)"
+          >详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -302,6 +308,8 @@
         <el-button @click="cancel_jc">取 消</el-button>
       </div>
     </el-dialog>
+    <!--详情-->
+    <DetialDialog ref="detial" />
     <!--用户选择弹框（多选）-->
     <userAddMultipleDialog ref="user" @getAddUser="getAddUser" />
     <!--用户选择弹框（单选）-->
@@ -321,10 +329,12 @@ import Editor from '@/components/Editor';
 import { getToken } from "@/utils/auth";
 import userAddMultipleDialog from "@/views/system/user/userAddMultipleDialog";
 import userAddSingleDialog from "@/views/system/user/userAddSingleDialog";
+import DetialDialog from "./DetialDialog";
 export default {
   name: "ArtificialPatrol",
   components: {
     Editor,
+    DetialDialog,
     userAddMultipleDialog,
     userAddSingleDialog
   },
@@ -587,7 +597,7 @@ export default {
         this.selectUser2 = [];
         var user = new Object();
         user.userId = response.data.relieveBy;
-        user.userName = response.data.relieveByName;
+        user.nickName = response.data.relieveByName;
         this.selectUser2.push(user);
       });
     },
@@ -675,7 +685,7 @@ export default {
     getAddUser2(data) {
       this.selectUser2.push(data);
       var userId = data.userId;
-      var userName = data.userName;
+      var userName = data.nickName;
       this.form_jc.relieveBy = userId;
       this.form_jc.relieveByName = userName;
     }
