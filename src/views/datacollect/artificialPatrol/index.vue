@@ -209,6 +209,21 @@
               </el-upload>
             </el-form-item>
           </el-col>
+          <el-col style="display:none;">
+            <el-dialog :visible.sync="dialogImageVisible" append-to-body>
+              <img width="100%" :src="dialogImageUrl" alt />
+            </el-dialog>
+            <el-dialog :visible.sync="dialogVedioVisible" append-to-body>
+              <video width="600" height="500" controls>
+                <source :src="videoUrl" type="video/mp4" />
+                <source :src="videoUrl" type="video/webm" />
+                <source :src="videoUrl" type="video/ogg" />您的浏览器不支持 HTML5 video 标签。
+              </video>
+            </el-dialog>
+            <el-dialog :visible.sync="dialogAedioVisible" append-to-body>
+              <audio :src="aideoUrl">您的浏览器不支持 audio 标签。</audio>
+            </el-dialog>
+          </el-col>
           <el-col :span="24">
             <el-form-item label="发布内容" prop="releaseContent">
               <el-input v-model="form.releaseContent" type="textarea" placeholder="请输入发布内容" />
@@ -372,7 +387,11 @@ export default {
       patrolTypeOptions: [],
       stateReleaseOptions: [],
       // 日期范围
-      dateRange: []
+      dateRange: [],
+      // 文件
+      dialogImageUrl: undefined,
+      dialogImageVisible: false,
+      fileNameDown: undefined
     };
   },
   created() {
