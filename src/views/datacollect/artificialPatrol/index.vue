@@ -114,6 +114,7 @@
           <span>{{ parseTime(scope.row.warnRelieveTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="解除人" align="center" prop="relieveByName" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -289,12 +290,18 @@
     <!--用户选择弹框（多选）-->
     <userAddMultipleDialog ref="user" @getAddUser="getAddUser" />
     <!--用户选择弹框（单选）-->
-    <userAddSingleDialog ref="user2" @getAddUser="getAddUser2" />
+    <userAddSingleDialog ref="user2" @getAddUser2="getAddUser2" />
   </div>
 </template>
 
 <script>
-import { listArtificialPatrol, getArtificialPatrol, delArtificialPatrol, addArtificialPatrol, updateArtificialPatrol, exportArtificialPatrol } from "@/api/datacollect/artificialPatrol";
+import { listArtificialPatrol,
+  getArtificialPatrol,
+  delArtificialPatrol,
+  addArtificialPatrol,
+  updateArtificialPatrol,
+  relieveWarning,
+  exportArtificialPatrol } from "@/api/datacollect/artificialPatrol";
 import Editor from '@/components/Editor';
 import { getToken } from "@/utils/auth";
 import userAddMultipleDialog from "@/views/system/user/userAddMultipleDialog";
@@ -453,7 +460,11 @@ export default {
     /** 解除预警表单重置 */
     reset_jc() {
       this.form_jc = {
-
+        warnRelieveTime: undefined,
+        relieveByName: undefined,
+        relieveBy: undefined,
+        safetyAssessment: undefined,
+        relieveDetails: undefined
       };
       this.resetForm("form_jc");
     },
@@ -507,6 +518,7 @@ export default {
     handleAdd() {
       this.reset();
       this.selectUser = [];
+      this.selectUser2 = [];
       this.open = true;
       this.title = "添加人工巡检登记";
     },
@@ -515,6 +527,7 @@ export default {
       this.reset();
       const id = row.id || this.ids
       getArtificialPatrol(id).then(response => {
+        this.open = true;
         // 将附件值进行转换
         var filesArr = [];
         if (response.data.files) {
@@ -542,8 +555,6 @@ export default {
           user.nickName = acceptByNames[i]
           this.selectUser.push(user)
         }
-        this.open = true;
-        this.title = "修改人工巡检登记";
       });
     },
     /** 解除预警按钮 */
@@ -553,6 +564,12 @@ export default {
       getArtificialPatrol(id).then(response => {
         this.open_jc = true;
         this.form_jc = response.data;
+        //解除预警人员回显
+        this.selectUser2 = [];
+        var user = new Object();
+        user.userId = response.data.relieveBy;
+        user.userName = response.data.relieveByName;
+        this.selectUser2.push(user);
       });
     },
     /** 提交按钮 */
@@ -588,10 +605,10 @@ export default {
     submitForm_jc: function() {
       this.$refs["form_jc"].validate(valid => {
         if (valid) {
-            addArtificialPatrol(this.form).then(response => {
+          relieveWarning(this.form_jc).then(response => {
               if (response.code === 200) {
                 this.msgSuccess("保存成功！");
-                this.open = false;
+                this.open_jc = false;
                 this.getList();
               }
             });
@@ -637,15 +654,11 @@ export default {
       this.form.acceptByName = userNames.substring(0, userNames.length - 1);
     },
     getAddUser2(data) {
-      this.selectUser = data
-      var userIds = ''
-      var userNames = ''
-      this.selectUser.map(item => {
-        userIds += item.userId + ','
-        userNames += item.nickName + ','
-      });
-      this.form.acceptBy = userIds.substring(0, userIds.length - 1);
-      this.form.acceptByName = userNames.substring(0, userNames.length - 1);
+      this.selectUser2.push(data);
+      var userId = data.userId;
+      var userName = data.userName;
+      this.form_jc.relieveBy = userId;
+      this.form_jc.relieveByName = userName;
     }
   }
 };

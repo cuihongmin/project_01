@@ -34,6 +34,14 @@ export function updateArtificialPatrol(data) {
     data: data
   })
 }
+// 修改人工巡检登记
+export function relieveWarning(data) {
+  return request({
+    url: '/datacollect/artificialPatrol/relieveWarning',
+    method: 'POST',
+    data: data
+  })
+}
 
 // 删除人工巡检登记
 export function delArtificialPatrol(id) {
