@@ -176,9 +176,10 @@ import {
   updateGroupManage,
   exportGroupManage,
 } from "@/api/groupperiod/groupManage";
+import { detectionindextypeTypeList } from "@/api/equipment/equipment";
 
 export default {
-  name: "Server",
+  name: "equipment",
   data() {
     return {
       // 遮罩层
@@ -211,63 +212,15 @@ export default {
       rules: {},
       // 加载层信息
       loading: [],
-      // 服务器信息
-      server: [],
+      // // 服务器信息
+      // server: [],
       data: [
         {
           label: "传感器",
           icon: "el-icon-share",
           children: [
             {
-              label: "GNSS位移",
-              icon: "el-icon-s-platform",
-            },
-            {
-              label: "测斜仪",
-              icon: "el-icon-s-platform",
-            },
-            {
-              label: "渗压剂",
-              icon: "el-icon-s-platform",
-            },
-            {
-              label: "超声波物位计",
-              icon: "el-icon-s-platform",
-            },
-            {
-              label: "超声波测距仪",
-              icon: "el-icon-s-platform",
-            },
-            {
-              label: "水位计",
-              icon: "el-icon-s-platform",
-            },
-            {
-              label: "超声波液位计",
-              icon: "el-icon-s-platform",
-            },
-            {
-              label: "雨量计",
-              icon: "el-icon-s-platform",
-            },
-            {
-              label: "液位计",
-              icon: "el-icon-s-platform",
-            },
-            {
-              label: "孔隙水压力计",
-              icon: "el-icon-s-platform",
-            },
-            {
-              label: "浊度仪",
-              icon: "el-icon-s-platform",
-            },
-            {
-              label: "浊度仪",
-              icon: "el-icon-s-platform",
-            },
-            {
-              label: "PH值监测仪",
+              label: "",
               icon: "el-icon-s-platform",
             },
           ],
@@ -281,7 +234,9 @@ export default {
   },
   created() {
     this.getList();
-    this.openLoading();
+    this.getList2();
+
+    // this.openLoading();
   },
   methods: {
     // 打开加载层
@@ -296,129 +251,135 @@ export default {
     handleNodeClick(data) {
       console.log(data);
     },
-    methods: {
-      /** 查询群组管理列表 */
-      getList() {
-        this.loading = true;
-        listGroupManage(this.queryParams).then((response) => {
-          this.groupManageList = response.rows;
-          this.total = response.total;
-          this.loading = false;
-        });
-      },
-      // 取消按钮
-      cancel() {
-        this.open = false;
-        this.reset();
-      },
-      // 表单重置
-      reset() {
-        this.form = {
-          id: undefined,
-          name: undefined,
-          ip: undefined,
-          port: undefined,
-          remark: undefined,
-          createBy: undefined,
-          createTime: undefined,
-          updateBy: undefined,
-          updateTime: undefined,
-        };
-        this.resetForm("form");
-      },
-      /** 搜索按钮操作 */
-      handleQuery() {
-        this.queryParams.pageNum = 1;
-        this.getList();
-      },
-      /** 重置按钮操作 */
-      resetQuery() {
-        this.resetForm("queryForm");
-        this.handleQuery();
-      },
-      // 多选框选中数据
-      handleSelectionChange(selection) {
-        this.ids = selection.map((item) => item.id);
-        this.single = selection.length != 1;
-        this.multiple = !selection.length;
-      },
-      /** 新增按钮操作 */
-      handleAdd() {
-        this.reset();
+    /** 查询群组管理列表 */
+    getList() {
+      this.loading = true;
+      listGroupManage(this.queryParams).then((response) => {
+        this.groupManageList = response.rows;
+        this.total = response.total;
+        this.loading = false;
+      });
+    },
+    getList2() {
+      this.loading = true;
+      detectionindextypeTypeList().then((response) => {
+        this.data.children.label = response.rows.name;
+
+        this.loading = false;
+      });
+    },
+    // 取消按钮
+    cancel() {
+      this.open = false;
+      this.reset();
+    },
+    // 表单重置
+    reset() {
+      this.form = {
+        id: undefined,
+        name: undefined,
+        ip: undefined,
+        port: undefined,
+        remark: undefined,
+        createBy: undefined,
+        createTime: undefined,
+        updateBy: undefined,
+        updateTime: undefined,
+      };
+      this.resetForm("form");
+    },
+    /** 搜索按钮操作 */
+    handleQuery() {
+      this.queryParams.pageNum = 1;
+      this.getList();
+    },
+    /** 重置按钮操作 */
+    resetQuery() {
+      this.resetForm("queryForm");
+      this.handleQuery();
+    },
+    // 多选框选中数据
+    handleSelectionChange(selection) {
+      this.ids = selection.map((item) => item.id);
+      this.single = selection.length != 1;
+      this.multiple = !selection.length;
+    },
+    /** 新增按钮操作 */
+    handleAdd() {
+      this.reset();
+      this.open = true;
+      this.title = "添加群组管理";
+    },
+    /** 修改按钮操作 */
+    handleUpdate(row) {
+      this.reset();
+      const id = row.id || this.ids;
+      getGroupManage(id).then((response) => {
+        this.form = response.data;
         this.open = true;
-        this.title = "添加群组管理";
-      },
-      /** 修改按钮操作 */
-      handleUpdate(row) {
-        this.reset();
-        const id = row.id || this.ids;
-        getGroupManage(id).then((response) => {
-          this.form = response.data;
-          this.open = true;
-          this.title = "修改群组管理";
-        });
-      },
-      /** 提交按钮 */
-      submitForm: function () {
-        this.$refs["form"].validate((valid) => {
-          if (valid) {
-            if (this.form.id != undefined) {
-              updateGroupManage(this.form).then((response) => {
-                if (response.code === 200) {
-                  this.msgSuccess("修改成功");
-                  this.open = false;
-                  this.getList();
-                }
-              });
-            } else {
-              addGroupManage(this.form).then((response) => {
-                if (response.code === 200) {
-                  this.msgSuccess("新增成功");
-                  this.open = false;
-                  this.getList();
-                }
-              });
-            }
+        this.title = "修改群组管理";
+      });
+    },
+    /** 提交按钮 */
+    submitForm: function () {
+      this.$refs["form"].validate((valid) => {
+        if (valid) {
+          if (this.form.id != undefined) {
+            updateGroupManage(this.form).then((response) => {
+              if (response.code === 200) {
+                this.msgSuccess("修改成功");
+                this.open = false;
+                this.getList();
+              }
+            });
+          } else {
+            addGroupManage(this.form).then((response) => {
+              if (response.code === 200) {
+                this.msgSuccess("新增成功");
+                this.open = false;
+                this.getList();
+              }
+            });
           }
-        });
-      },
-      /** 删除按钮操作 */
-      handleDelete(row) {
-        const ids = row.id || this.ids;
-        this.$confirm(
-          '是否确认删除群组管理编号为"' + ids + '"的数据项?',
-          "警告",
-          {
-            confirmButtonText: "确定",
-            cancelButtonText: "取消",
-            type: "warning",
-          }
-        )
-          .then(function () {
-            return delGroupManage(ids);
-          })
-          .then(() => {
-            this.getList();
-            this.msgSuccess("删除成功");
-          })
-          .catch(function () {});
-      },
-      /** 导出按钮操作 */
-      handleExport() {
-        const queryParams = this.queryParams;
-        this.$confirm("是否确认导出所有群组管理数据项?", "警告", {
+        }
+      });
+    },
+    /** 删除按钮操作 */
+    handleDelete(row) {
+      const ids = row.id || this.ids;
+      this.$confirm(
+        '是否确认删除群组管理编号为"' + ids + '"的数据项?',
+        "警告",
+        {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning",
+        }
+      )
+        .then(function () {
+          return delGroupManage(ids);
         })
-          .then(function () {
-            return exportGroupManage(queryParams);
-          })
-          .then((response) => {
-            this.download(response.msg);
-          })
-          .catch(function () {});
-      },
+        .then(() => {
+          this.getList();
+          this.msgSuccess("删除成功");
+        })
+        .catch(function () {});
+    },
+    /** 导出按钮操作 */
+    handleExport() {
+      const queryParams = this.queryParams;
+      this.$confirm("是否确认导出所有群组管理数据项?", "警告", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(function () {
+          return exportGroupManage(queryParams);
+        })
+        .then((response) => {
+          this.download(response.msg);
+        })
+        .catch(function () {});
     },
   },
 };
