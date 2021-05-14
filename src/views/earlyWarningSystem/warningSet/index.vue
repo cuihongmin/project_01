@@ -7,7 +7,7 @@
       label-width="68px"
     >
       <el-form-item label="所属分类">
-        <el-select v-model="form.region" placeholder="请选择活动区域">
+        <el-select v-model="queryParams.type" placeholder="请选择活动区域">
           <el-option
             v-for="dict in warnTypeOptions"
             :key="dict.dictValue"
@@ -17,7 +17,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="预警级别">
-        <el-select v-model="form.region" placeholder="请选择活动区域">
+        <el-select v-model="queryParams.warnLevel" placeholder="请选择活动区域">
           <el-option
             v-for="dict in warnLevelOptions"
             :key="dict.dictValue"
@@ -66,18 +66,29 @@
         align="center"
         prop="invokeTarget"
         :show-overflow-tooltip="true"
-      />
+      >
+        <template slot-scope="scope">
+          <div v-for="(val, index) in scope.row.alarmWay" :key="index">
+            <div>{{ val.name + "," }}</div>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column
         label="通知安全员"
         align="center"
-        prop="cronExpression"
         :show-overflow-tooltip="true"
         width="120"
-      />
+      >
+        <template slot-scope="scope">
+          <div v-for="(val, index) in scope.row.safetyPeople" :key="index">
+            <div>{{ val.name + "," }}</div>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column
         label="备注"
         align="center"
-        prop="cronExpression"
+        prop="remak"
         :show-overflow-tooltip="true"
         width="160"
       />
@@ -117,14 +128,35 @@
       width="300px"
       append-to-body
     >
-      <div class="checkbox">
+      <!-- <div class="checkbox" v-if="alarList2">
+        
         <el-checkbox label="弹窗报警" name="type"></el-checkbox>
         <el-checkbox label="声音报警" name="type"></el-checkbox>
-        <el-checkbox label="邮件报警" name="type"></el-checkbox>
-        <el-checkbox label="短信报警" name="type"></el-checkbox>
+        <el-checkbox
+          label="邮件报警"
+          v-model="checked"
+          name="type"
+        ></el-checkbox>
+        <el-checkbox
+          label="短信报警"
+          v-model="checked"
+          name="type"
+        ></el-checkbox>
         <el-checkbox label="电话报警" name="type"></el-checkbox>
-      </div>
-
+      </div> -->
+      <el-checkbox-group
+        v-model="checkedCities"
+        @change="handleCheckedCitiesChange"
+        style="display: flex; flex-direction: column; margin-left: 5rem"
+      >
+        <el-checkbox
+          v-for="val in dataList"
+          :label="val.name"
+          :key="val.id"
+          :value="val.id"
+          >{{ val.name }}</el-checkbox
+        >
+      </el-checkbox-group>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">保存</el-button>
         <el-button @click="cancel">取 消</el-button>
@@ -166,7 +198,7 @@
 
       <el-table
         v-loading="loading"
-        :data="jobList"
+        :data="peopleList"
         border
         @selection-change="handleSelectionChange"
       >
@@ -179,12 +211,7 @@
           :show-overflow-tooltip="true"
           :formatter="warnTypeFormat"
         />
-        <el-table-column
-          label="姓名"
-          align="center"
-          prop="warnLevel"
-          :formatter="warnLevelFormat"
-        />
+        <el-table-column label="姓名" align="center" prop="name" />
         <el-table-column
           label="部门"
           align="center"
@@ -226,7 +253,7 @@
       />
 
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">保存</el-button>
+        <el-button type="primary" @click="submitSave">保存</el-button>
         <el-button @click="openView = false">关 闭</el-button>
       </div>
     </el-dialog>
@@ -244,12 +271,26 @@ import {
   runJob,
   changeJobStatus,
 } from "@/api/monitor/job";
-import { warnConfigList } from "@/api/warningSet/warningSet.js";
+import {
+  warnConfigList,
+  alarmWays,
+  publishfeedbackAlarmwayList,
+  safetyPeople,
+  safetyPeopleSave,
+} from "@/api/warningSet/warningSet.js";
 
 export default {
   name: "Job",
   data() {
     return {
+      peopleList: [],
+      id: [],
+      ids: [],
+      dataList: [],
+      // 点击选择预警方式
+      checkedCities: [],
+      cities: [],
+      checked: false,
       // 遮罩层
       loading: true,
       // 选中数组
@@ -262,6 +303,9 @@ export default {
       total: 0,
       // 定时任务表格数据
       jobList: [],
+      alarList: [],
+      alarList2: [],
+      idList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -276,9 +320,8 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        jobName: undefined,
-        jobGroup: undefined,
-        status: undefined,
+        type: undefined,
+        warnLevel: undefined,
       },
       // 表单参数
       form: {},
@@ -314,13 +357,47 @@ export default {
     });
   },
   methods: {
+    handleCheckedCitiesChange(value) {
+      console.log(value);
+    },
     /** 查询定时任务列表 */
     getList() {
       this.loading = true;
+      console.log(this.queryParams);
       warnConfigList(this.queryParams).then((response) => {
         this.jobList = response.rows;
-        this.total = response.total;
         this.loading = false;
+      });
+    },
+    /** 查询定时任务列表 */
+    getAlarmWays(row) {
+      this.loading = true;
+      this.checkedCities = [];
+      this.ids = [];
+      alarmWays(row.id).then((response) => {
+        this.open = true;
+        this.alarList2 = response.rows;
+        console.log("this.alarList2", this.alarList2);
+        this.alarList2.forEach((element) => {
+          console.log(element.name);
+          this.checkedCities.push(element.name);
+          this.ids.push(element.id);
+        });
+        console.log("this.checkedCities", this.checkedCities);
+        // console.log("this.idList", this.idList);
+
+        this.loading = false;
+      });
+      this.$forceUpdate();
+    },
+    /** 查询定时任务列表 */
+    getPublishfeedbackAlarmwayList() {
+      this.loading = true;
+      // this.ids = [];
+      publishfeedbackAlarmwayList().then((response) => {
+        this.open = true;
+        this.dataList = response.rows;
+        // console.log(this.cities);
       });
     },
     // 任务组名字典翻译
@@ -335,6 +412,8 @@ export default {
     cancel() {
       this.open = false;
       this.reset();
+      // this.getList();
+      this.alarList2 = [];
     },
     // 表单重置
     reset() {
@@ -362,7 +441,9 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map((item) => item.jobId);
+      console.log(selection);
+      this.ids = selection.map((item) => item.id);
+      console.log(this.ids);
       this.single = selection.length != 1;
       this.multiple = !selection.length;
     },
@@ -388,15 +469,29 @@ export default {
           row.status = row.status === "0" ? "1" : "0";
         });
     },
-    /* 立即执行一次 */
+    /* 编辑执行操作 */
     handleRun(row) {
-      this.open = true;
+      this.getPublishfeedbackAlarmwayList(row);
+      this.getAlarmWays(row);
     },
     /** 任务详细信息 */
     handleView(row) {
-      getJob(row.jobId).then((response) => {
-        this.form = response.data;
+      this.id = row.id;
+      console.log(this.id);
+      safetyPeople(row.id).then((response) => {
         this.openView = true;
+        this.peopleList = response.rows;
+        console.log(this.peopleList);
+      });
+    },
+    submitSave() {
+      let opt = {
+        id: this.id,
+        peopleIds: this.ids,
+      };
+      console.log(opt);
+      safetyPeopleSave(opt).then((response) => {
+        console.log(response.rows);
       });
     },
     /** 任务日志列表查询 */
@@ -484,15 +579,6 @@ export default {
 };
 </script>
 <style scoped>
-div .checkbox {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  flex-wrap: nowrap;
-  margin-left: 4rem;
-}
 .el-checkbox {
   color: #606266;
   font-weight: 500;
