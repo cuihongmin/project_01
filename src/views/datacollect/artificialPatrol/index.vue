@@ -1,11 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form
-      :model="queryParams"
-      ref="queryForm"
-      :inline="true"
-      label-width="68px"
-    >
+    <el-form :model="queryParams" ref="queryForm" :inline="true" label-width="68px">
       <el-form-item label="巡检时间" prop="patrolTime">
         <el-date-picker
           v-model="dateRange"
@@ -29,12 +24,7 @@
         />
       </el-form-item>
       <el-form-item label="巡检类别" prop="patrolTypeId">
-        <el-select
-          v-model="queryParams.patrolTypeId"
-          placeholder="请选择巡检类别"
-          clearable
-          size="small"
-        >
+        <el-select v-model="queryParams.patrolTypeId" placeholder="请选择巡检类别" clearable size="small">
           <el-option
             v-for="dict in patrolTypeOptions"
             :key="dict.dictValue"
@@ -45,12 +35,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="安全评估" prop="safetyAssessment">
-        <el-select
-          v-model="queryParams.safetyAssessment"
-          placeholder="请选择安全评估"
-          clearable
-          size="small"
-        >
+        <el-select v-model="queryParams.safetyAssessment" placeholder="请选择安全评估" clearable size="small">
           <el-option
             v-for="dict in safetyAssessmentOptions"
             :key="dict.dictValue"
@@ -61,16 +46,8 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button
-          type="primary"
-          icon="el-icon-search"
-          size="mini"
-          @click="handleQuery"
-          >搜索</el-button
-        >
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery"
-          >重置</el-button
-        >
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
@@ -82,8 +59,7 @@
           size="mini"
           @click="handleAdd"
           v-hasPermi="['datacollect:artificialPatrol:add']"
-          >新增</el-button
-        >
+        >新增</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -93,8 +69,7 @@
           :disabled="single"
           @click="handleUpdate"
           v-hasPermi="['datacollect:artificialPatrol:edit']"
-          >修改</el-button
-        >
+        >修改</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -104,8 +79,7 @@
           :disabled="multiple"
           @click="handleDelete"
           v-hasPermi="['datacollect:artificialPatrol:remove']"
-          >删除</el-button
-        >
+        >删除</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -114,56 +88,34 @@
           size="mini"
           :disabled="multiple"
           @click="handleJcPatrol"
-          >预警解除状态</el-button
-        >
+        >预警解除状态</el-button>
       </el-col>
     </el-row>
 
-    <el-table
-      v-loading="loading"
-      :data="artificialPatrolList"
-      @selection-change="handleSelectionChange"
-    >
+    <el-table v-loading="loading" :data="artificialPatrolList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column
-        label="巡检时间"
-        align="center"
-        prop="patrolTime"
-        width="180"
-      >
+      <el-table-column label="巡检时间" align="center" prop="patrolTime" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.patrolTime, "{y}-{m}-{d}") }}</span>
+          <span>{{ parseTime(scope.row.patrolTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="巡检类别" align="center" prop="patrolTypeId" />
-      <el-table-column
-        label="安全评估"
-        align="center"
-        prop="safetyAssessment"
-      />
-      <el-table-column
-        label="信息状态发布"
-        align="center"
-        prop="stateRelease"
-      />
+      <el-table-column label="巡检类别" align="center" prop="patrolTypeId" :formatter="patrolTypeFormat" show-overflow-tooltip/>
+      <el-table-column label="安全评估" align="center" prop="safetyAssessment" :formatter="safetyAssessmentFormat" show-overflow-tooltip/>
+      <el-table-column label="信息状态发布" align="center" prop="stateRelease" :formatter="stateReleaseFormat" show-overflow-tooltip/>
       <el-table-column label="记录人" align="center" prop="createBy" />
       <el-table-column label="记录时间" align="center" prop="createTime" />
-      <el-table-column label="预警解除状态" align="center" prop="warnState" />
-      <el-table-column
-        label="预警解除时间"
-        align="center"
-        prop="warnRelieveTime"
-        width="180"
-      >
+      <el-table-column label="预警解除状态" align="center" prop="warnState">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.warnRelieveTime, "{y}-{m}-{d}") }}</span>
+          <span>{{ scope.row.warnState == '0' ? '未解除' : '已解除' }}</span>
         </template>
       </el-table-column>
-      <el-table-column
-        label="操作"
-        align="center"
-        class-name="small-padding fixed-width"
-      >
+      <el-table-column label="预警解除时间" align="center" prop="warnRelieveTime" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.warnRelieveTime, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="解除人" align="center" prop="relieveByName" />
+      <el-table-column label="操作" align="center" width="200" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             size="mini"
@@ -171,22 +123,26 @@
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['datacollect:artificialPatrol:edit']"
-            >修改</el-button
-          >
+          >修改</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['datacollect:artificialPatrol:remove']"
-            >删除</el-button
-          >
+          >删除</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-view"
+            @click="$refs.detial.open(scope.row)"
+          >详情</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <pagination
-      v-show="total > 0"
+      v-show="total>0"
       :total="total"
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
@@ -199,26 +155,17 @@
         <el-row>
           <el-col :span="12">
             <el-form-item label="巡检时间" prop="patrolTime">
-              <el-date-picker
-                clearable
-                size="small"
-                style="width: 200px"
-                v-model="form.patrolTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="选择巡检时间"
-              >
+              <el-date-picker clearable size="small" style="width: 200px"
+                              v-model="form.patrolTime"
+                              type="date"
+                              value-format="yyyy-MM-dd"
+                              placeholder="选择巡检时间">
               </el-date-picker>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="巡检类别" prop="patrolTypeId">
-              <el-select
-                v-model="form.patrolTypeId"
-                placeholder="请选择巡检类别"
-                clearable
-                size="small"
-              >
+              <el-select v-model="form.patrolTypeId" placeholder="请选择巡检类别" clearable size="small">
                 <el-option
                   v-for="dict in patrolTypeOptions"
                   :key="dict.dictValue"
@@ -230,20 +177,12 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="巡查人员" prop="patrolPerson">
-              <el-input
-                v-model="form.patrolPerson"
-                placeholder="请输入巡查人员"
-              />
+              <el-input v-model="form.patrolPerson" placeholder="请输入巡查人员" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="安全评估" prop="safetyAssessment">
-              <el-select
-                v-model="form.safetyAssessment"
-                placeholder="请选择安全评估"
-                clearable
-                size="small"
-              >
+              <el-select v-model="form.safetyAssessment" placeholder="请选择安全评估" clearable size="small">
                 <el-option
                   v-for="dict in safetyAssessmentOptions"
                   :key="dict.dictValue"
@@ -276,23 +215,29 @@
               </el-upload>
             </el-form-item>
           </el-col>
+          <el-col style="display:none;">
+            <el-dialog :visible.sync="dialogImageVisible" append-to-body>
+              <img width="100%" :src="dialogImageUrl" alt />
+            </el-dialog>
+            <el-dialog :visible.sync="dialogVedioVisible" append-to-body>
+              <video width="600" height="500" controls>
+                <source :src="videoUrl" type="video/mp4" />
+                <source :src="videoUrl" type="video/webm" />
+                <source :src="videoUrl" type="video/ogg" />您的浏览器不支持 HTML5 video 标签。
+              </video>
+            </el-dialog>
+            <el-dialog :visible.sync="dialogAedioVisible" append-to-body>
+              <audio :src="aideoUrl">您的浏览器不支持 audio 标签。</audio>
+            </el-dialog>
+          </el-col>
           <el-col :span="24">
             <el-form-item label="发布内容" prop="releaseContent">
-              <el-input
-                v-model="form.releaseContent"
-                type="textarea"
-                placeholder="请输入发布内容"
-              />
+              <el-input v-model="form.releaseContent" type="textarea" placeholder="请输入发布内容" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="状态发布" prop="stateRelease">
-              <el-select
-                v-model="form.stateRelease"
-                placeholder="请选择状态发布"
-                clearable
-                size="small"
-              >
+              <el-select v-model="form.stateRelease" placeholder="请选择状态发布" clearable size="small">
                 <el-option
                   v-for="dict in stateReleaseOptions"
                   :key="dict.dictValue"
@@ -304,21 +249,10 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="接受人员" prop="acceptBy">
-              <el-input
-                disabled
-                v-model="form.acceptByName"
-                placeholder="请选择接受人员"
-              >
-                <el-button
-                  slot="append"
-                  icon="el-icon-user"
-                  @click="$refs.user.add(selectUser, 'getAddUser')"
-                ></el-button>
+              <el-input disabled v-model="form.acceptByName" placeholder="请选择接受人员" >
+                <el-button slot="append" icon="el-icon-user" @click="$refs.user.add(selectUser, 'getAddUser')"></el-button>
               </el-input>
-              <el-input
-                style="display: none"
-                v-model="form.acceptBy"
-              ></el-input>
+              <el-input style="display: none" v-model="form.acceptBy" ></el-input>
             </el-form-item>
           </el-col>
         </el-row>
@@ -329,61 +263,30 @@
       </div>
     </el-dialog>
     <!-- 预警状态解除对话框 -->
-    <el-dialog
-      title="解除预警"
-      :visible.sync="open_jc"
-      width="600px"
-      append-to-body
-    >
-      <el-form
-        ref="form_jc"
-        :model="form_jc"
-        :rules="rules_jc"
-        label-width="100px"
-      >
+    <el-dialog title="解除预警" :visible.sync="open_jc" width="600px" append-to-body>
+      <el-form ref="form_jc" :model="form_jc" :rules="rules_jc" label-width="100px">
         <el-row>
           <el-col :span="24">
             <el-form-item label="预警解除时间" prop="patrolTime">
-              <el-date-picker
-                clearable
-                size="small"
-                style="width: 200px"
-                v-model="form_jc.warnRelieveTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="选择预警解除时间"
-              >
+              <el-date-picker clearable size="small" style="width: 200px"
+                              v-model="form_jc.warnRelieveTime"
+                              type="date"
+                              value-format="yyyy-MM-dd"
+                              placeholder="选择预警解除时间">
               </el-date-picker>
             </el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item label="解除预警人员" prop="relieveBy">
-              <el-input
-                disabled
-                v-model="form_jc.relieveByName"
-                style="width: 200px"
-                placeholder="请选择解除预警人员"
-              >
-                <el-button
-                  slot="append"
-                  icon="el-icon-user"
-                  @click="$refs.user2.add(selectUser2, 'getAddUser2')"
-                ></el-button>
+              <el-input disabled v-model="form_jc.relieveByName" style="width: 200px" placeholder="请选择解除预警人员" >
+                <el-button slot="append" icon="el-icon-user" @click="$refs.user2.add(selectUser2, 'getAddUser2')"></el-button>
               </el-input>
-              <el-input
-                style="display: none"
-                v-model="form_jc.relieveBy"
-              ></el-input>
+              <el-input style="display: none" v-model="form_jc.relieveBy" ></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item label="安全评估" prop="safetyAssessment">
-              <el-select
-                v-model="form_jc.safetyAssessment"
-                placeholder="请选择安全评估"
-                clearable
-                size="small"
-              >
+              <el-select v-model="form_jc.safetyAssessment" placeholder="请选择安全评估" clearable size="small">
                 <el-option
                   v-for="dict in safetyAssessmentOptions"
                   :key="dict.dictValue"
@@ -395,11 +298,7 @@
           </el-col>
           <el-col :span="24">
             <el-form-item label="解除操作情况" prop="releaseContent">
-              <el-input
-                v-model="form_jc.relieveDetails"
-                type="textarea"
-                placeholder="请输入解除操作情况"
-              />
+              <el-input v-model="form_jc.relieveDetails" type="textarea" placeholder="请输入解除操作情况" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -409,37 +308,40 @@
         <el-button @click="cancel_jc">取 消</el-button>
       </div>
     </el-dialog>
+    <!--详情-->
+    <DetialDialog ref="detial" />
     <!--用户选择弹框（多选）-->
     <userAddMultipleDialog ref="user" @getAddUser="getAddUser" />
     <!--用户选择弹框（单选）-->
-    <userAddSingleDialog ref="user2" @getAddUser="getAddUser2" />
+    <userAddSingleDialog ref="user2" @getAddUser2="getAddUser2" />
   </div>
 </template>
 
 <script>
-import {
-  listArtificialPatrol,
+import { listArtificialPatrol,
   getArtificialPatrol,
   delArtificialPatrol,
   addArtificialPatrol,
   updateArtificialPatrol,
-  exportArtificialPatrol,
-} from "@/api/datacollect/artificialPatrol";
-import Editor from "@/components/Editor";
+  relieveWarning,
+  exportArtificialPatrol } from "@/api/datacollect/artificialPatrol";
+import Editor from '@/components/Editor';
 import { getToken } from "@/utils/auth";
 import userAddMultipleDialog from "@/views/system/user/userAddMultipleDialog";
 import userAddSingleDialog from "@/views/system/user/userAddSingleDialog";
+import DetialDialog from "./DetialDialog";
 export default {
   name: "ArtificialPatrol",
   components: {
     Editor,
+    DetialDialog,
     userAddMultipleDialog,
-    userAddSingleDialog,
+    userAddSingleDialog
   },
   data() {
     return {
       headers: {
-        Authorization: "Bearer " + getToken(),
+        Authorization: "Bearer " + getToken()
       },
       requestApi: process.env.VUE_APP_BASE_API,
       fileList: [],
@@ -477,16 +379,18 @@ export default {
         warnState: undefined,
         warnRelieveTime: undefined,
         relieveDetails: undefined,
-        relieveBy: undefined,
+        relieveBy: undefined
       },
       // 表单参数
       form: {},
       // 表单校验
-      rules: {},
+      rules: {
+      },
       //  解除预警,表单参数
       form_jc: {},
       //  解除预警,表单校验
-      rules_jc: {},
+      rules_jc: {
+      },
       selectUser: [],
       selectUser2: [],
       safetyAssessmentOptions: [],
@@ -494,18 +398,22 @@ export default {
       stateReleaseOptions: [],
       // 日期范围
       dateRange: [],
+      // 文件
+      dialogImageUrl: undefined,
+      dialogImageVisible: false,
+      fileNameDown: undefined
     };
   },
   created() {
     //加载数据字典
-    this.getDicts("patrol_safety_assessment").then((response) => {
-      this.safetyAssessmentOptions = response.data; //安全评估
+    this.getDicts("patrol_safety_assessment").then(response => {
+      this.safetyAssessmentOptions = response.data;//安全评估
     });
-    this.getDicts("patrol_type").then((response) => {
-      this.patrolTypeOptions = response.data; //巡检类别
+    this.getDicts("patrol_type").then(response => {
+      this.patrolTypeOptions = response.data;//巡检类别
     });
-    this.getDicts("patrol_state_release").then((response) => {
-      this.stateReleaseOptions = response.data; //状态发布
+    this.getDicts("patrol_state_release").then(response => {
+      this.stateReleaseOptions = response.data;//状态发布
     });
     this.getList();
   },
@@ -513,9 +421,7 @@ export default {
     /** 查询人工巡检登记列表 */
     getList() {
       this.loading = true;
-      listArtificialPatrol(
-        this.addDateRange(this.queryParams, this.dateRange)
-      ).then((response) => {
+      listArtificialPatrol(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
         this.artificialPatrolList = response.rows;
         this.total = response.total;
         this.loading = false;
@@ -523,10 +429,7 @@ export default {
     },
     // 安全评估字典翻译
     safetyAssessmentFormat(row, column) {
-      return this.selectDictLabel(
-        this.safetyAssessmentOptions,
-        row.safetyAssessment
-      );
+      return this.selectDictLabel(this.safetyAssessmentOptions, row.safetyAssessment);
     },
     // 巡检类别字典翻译
     patrolTypeFormat(row, column) {
@@ -545,7 +448,7 @@ export default {
         this.$message({
           message: res.msg,
           type: "error",
-          duration: 1000,
+          duration: 1000
         });
       }
     },
@@ -554,33 +457,22 @@ export default {
     },
     handleRemove(file, files) {
       console.log(file, files);
-      this.fileList = this.fileList.filter((item) => {
+      this.fileList = this.fileList.filter(item => {
         return item.uid !== file.uid;
       });
     },
     handlePreview(file) {
-      var fileType = file.fileSuffix;
-      if (
-        fileType == "jpg" ||
-        fileType == "jpeg" ||
-        fileType == "png" ||
-        fileType == "gif"
-      ) {
+      var fileType = file.fileSuffix
+      if(fileType == 'jpg' || fileType == 'jpeg' || fileType == 'png' || fileType == 'gif'){
         this.dialogImageUrl = file.url;
         this.dialogImageVisible = true;
-      } else if (
-        fileType == "mp4" ||
-        fileType == "avi" ||
-        fileType == "asf" ||
-        fileType == "rm" ||
-        fileType == "navi"
-      ) {
+      }else if(fileType == 'mp4' || fileType == 'avi' || fileType == 'asf' || fileType == 'rm' || fileType == 'navi'){
         this.videoUrl = file.url;
         this.dialogVedioVisible = true;
-      } else if (fileType == "mp3" || fileType == "wav") {
+      }else if(fileType == 'mp3' || fileType == 'wav'){
         this.aideoUrl = file.url;
         this.dialogAedioVisible = true;
-      } else {
+      }else{
         window.location.href = file.url;
       }
     },
@@ -596,7 +488,13 @@ export default {
     },
     /** 解除预警表单重置 */
     reset_jc() {
-      this.form_jc = {};
+      this.form_jc = {
+        warnRelieveTime: undefined,
+        relieveByName: undefined,
+        relieveBy: undefined,
+        safetyAssessment: undefined,
+        relieveDetails: undefined
+      };
       this.resetForm("form_jc");
     },
     // 表单重置
@@ -623,9 +521,9 @@ export default {
         updateTime: undefined,
         files: [],
         acceptBy: undefined,
-        acceptByName: undefined,
+        acceptByName: undefined
       };
-      this.fileList = [];
+      this.fileList = []
       this.resetForm("form");
     },
     /** 搜索按钮操作 */
@@ -641,22 +539,24 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map((item) => item.id);
-      this.single = selection.length != 1;
-      this.multiple = !selection.length;
+      this.ids = selection.map(item => item.id)
+      this.single = selection.length!=1
+      this.multiple = !selection.length
     },
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
       this.selectUser = [];
+      this.selectUser2 = [];
       this.open = true;
       this.title = "添加人工巡检登记";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      const id = row.id || this.ids;
-      getArtificialPatrol(id).then((response) => {
+      const id = row.id || this.ids
+      getArtificialPatrol(id).then(response => {
+        this.open = true;
         // 将附件值进行转换
         var filesArr = [];
         if (response.data.files) {
@@ -667,39 +567,43 @@ export default {
         this.form = response.data;
         // 附件赋值
         this.form.files = filesArr;
-        this.fileList = filesArr;
+        this.fileList = filesArr
         //接收人员回显
         this.selectUser = [];
-        var acceptBys = "";
-        if (response.data.acceptBy != null) {
-          acceptBys = response.data.acceptBy.split(",");
+        var acceptBys = '';
+        if(response.data.acceptBy != null){
+          acceptBys = response.data.acceptBy.split(',');
         }
-        var acceptByNames = "";
-        if (response.data.acceptByName != null) {
-          acceptByNames = response.data.acceptByName.split(",");
+        var acceptByNames = '';
+        if(response.data.acceptByName != null){
+          acceptByNames = response.data.acceptByName.split(',');
         }
-        for (var i = 0; i < acceptBys.length; i++) {
-          var user = new Object();
-          user.userId = acceptBys[i];
-          user.nickName = acceptByNames[i];
-          this.selectUser.push(user);
+        for(var i =0; i < acceptBys.length; i++){
+          var user = new Object()
+          user.userId = acceptBys[i]
+          user.nickName = acceptByNames[i]
+          this.selectUser.push(user)
         }
-        this.open = true;
-        this.title = "修改人工巡检登记";
       });
     },
     /** 解除预警按钮 */
     handleJcPatrol(row) {
       this.reset_jc();
-      const id = row.id || this.ids;
-      getArtificialPatrol(id).then((response) => {
+      const id = row.id || this.ids
+      getArtificialPatrol(id).then(response => {
         this.open_jc = true;
         this.form_jc = response.data;
+        //解除预警人员回显
+        this.selectUser2 = [];
+        var user = new Object();
+        user.userId = response.data.relieveBy;
+        user.nickName = response.data.relieveByName;
+        this.selectUser2.push(user);
       });
     },
     /** 提交按钮 */
-    submitForm: function () {
-      this.$refs["form"].validate((valid) => {
+    submitForm: function() {
+      this.$refs["form"].validate(valid => {
         if (valid) {
           //附件赋值
           if (this.fileList) {
@@ -707,7 +611,7 @@ export default {
             console.log("this.form.files ", this.form.files);
           }
           if (this.form.id != undefined) {
-            updateArtificialPatrol(this.form).then((response) => {
+            updateArtificialPatrol(this.form).then(response => {
               if (response.code === 200) {
                 this.msgSuccess("修改成功");
                 this.open = false;
@@ -715,7 +619,7 @@ export default {
               }
             });
           } else {
-            addArtificialPatrol(this.form).then((response) => {
+            addArtificialPatrol(this.form).then(response => {
               if (response.code === 200) {
                 this.msgSuccess("新增成功");
                 this.open = false;
@@ -727,78 +631,64 @@ export default {
       });
     },
     /** 解除预警弹框 提交按钮 */
-    submitForm_jc: function () {
-      this.$refs["form_jc"].validate((valid) => {
+    submitForm_jc: function() {
+      this.$refs["form_jc"].validate(valid => {
         if (valid) {
-          addArtificialPatrol(this.form).then((response) => {
-            if (response.code === 200) {
-              this.msgSuccess("保存成功！");
-              this.open = false;
-              this.getList();
-            }
-          });
+          relieveWarning(this.form_jc).then(response => {
+              if (response.code === 200) {
+                this.msgSuccess("保存成功！");
+                this.open_jc = false;
+                this.getList();
+              }
+            });
         }
       });
     },
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$confirm(
-        '是否确认删除人工巡检登记编号为"' + ids + '"的数据项?',
-        "警告",
-        {
+      this.$confirm('是否确认删除人工巡检登记编号为"' + ids + '"的数据项?', "警告", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
-          type: "warning",
-        }
-      )
-        .then(function () {
+          type: "warning"
+        }).then(function() {
           return delArtificialPatrol(ids);
-        })
-        .then(() => {
+        }).then(() => {
           this.getList();
           this.msgSuccess("删除成功");
-        })
-        .catch(function () {});
+        }).catch(function() {});
     },
     /** 导出按钮操作 */
     handleExport() {
       const queryParams = this.queryParams;
-      this.$confirm("是否确认导出所有人工巡检登记数据项?", "警告", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-        .then(function () {
+      this.$confirm('是否确认导出所有人工巡检登记数据项?', "警告", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }).then(function() {
           return exportArtificialPatrol(queryParams);
-        })
-        .then((response) => {
+        }).then(response => {
           this.download(response.msg);
-        })
-        .catch(function () {});
+        }).catch(function() {});
     },
     getAddUser(data) {
-      this.selectUser = data;
-      var userIds = "";
-      var userNames = "";
-      this.selectUser.map((item) => {
-        userIds += item.userId + ",";
-        userNames += item.nickName + ",";
+      this.selectUser = data
+      var userIds = ''
+      var userNames = ''
+      this.selectUser.map(item => {
+        userIds += item.userId + ','
+        userNames += item.nickName + ','
       });
       this.form.acceptBy = userIds.substring(0, userIds.length - 1);
       this.form.acceptByName = userNames.substring(0, userNames.length - 1);
     },
     getAddUser2(data) {
-      this.selectUser = data;
-      var userIds = "";
-      var userNames = "";
-      this.selectUser.map((item) => {
-        userIds += item.userId + ",";
-        userNames += item.nickName + ",";
-      });
-      this.form.acceptBy = userIds.substring(0, userIds.length - 1);
-      this.form.acceptByName = userNames.substring(0, userNames.length - 1);
-    },
-  },
+      this.selectUser2.push(data);
+      var userId = data.userId;
+      var userName = data.nickName;
+      this.form_jc.relieveBy = userId;
+      this.form_jc.relieveByName = userName;
+    }
+  }
 };
 </script>
