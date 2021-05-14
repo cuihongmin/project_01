@@ -30,11 +30,20 @@ export function publishfeedbackAlarmwayList(query) {
     params: query
   })
 }
-// 查询获取报警方式列表
-export function safetyPeopleSave(query) {
+// 安全人员保存接口
+export function safetyPeopleSave(opt) {
   return request({
-    url: '/warn/config/'+id+'/safety/people',
+    url: '/warn/config/'+opt.id+'/safety/people',
     method: 'put',
-    params: query
+    params: {"peopleIds": opt.peopleIds}
+  })
+}
+// 执行任务保存接口
+export function executeWaySave(opt) {
+
+  return request({
+    url: '/warn/config/'+opt.id+'/execute/way',
+    method: 'put',
+    params: {"execWayIds": opt.execWayIds}
   })
 }

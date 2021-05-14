@@ -27,7 +27,12 @@
       </el-col>
       <!--安全员数据-->
       <el-col :span="20" :xs="24">
-        <el-form :model="queryParams" ref="queryForm" :inline="true" label-width="68px">
+        <el-form
+          :model="queryParams"
+          ref="queryForm"
+          :inline="true"
+          label-width="68px"
+        >
           <el-form-item label="安全编号" prop="code">
             <el-input
               v-model="queryParams.code"
@@ -47,8 +52,16 @@
             />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">查询</el-button>
-            <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+            <el-button
+              type="primary"
+              icon="el-icon-search"
+              size="mini"
+              @click="handleQuery"
+              >查询</el-button
+            >
+            <el-button icon="el-icon-refresh" size="mini" @click="resetQuery"
+              >重置</el-button
+            >
           </el-form-item>
         </el-form>
 
@@ -60,7 +73,8 @@
               size="mini"
               @click="handleAdd"
               v-hasPermi="['safetypeople:list:add']"
-            >新增</el-button>
+              >新增</el-button
+            >
           </el-col>
           <el-col :span="1.5">
             <el-button
@@ -70,23 +84,32 @@
               :disabled="multiple"
               @click="handleDelete"
               v-hasPermi="['safetypeople:list:remove']"
-            >删除</el-button>
-
+              >删除</el-button
+            >
           </el-col>
         </el-row>
 
-        <el-table v-loading="loading" :data="listList" :row-class-name="rowClassName" @selection-change="handleSelectionChange">
-    <!--      <el-table-column label="id" align="center" prop="id" />-->
+        <el-table
+          v-loading="loading"
+          :data="listList"
+          :row-class-name="rowClassName"
+          @selection-change="handleSelectionChange"
+        >
+          <!--      <el-table-column label="id" align="center" prop="id" />-->
 
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column label="姓名" align="center" prop="name" />
-<!--          <el-table-column label="关联账号id" align="center" prop="relevanceUserId" />-->
+          <!--          <el-table-column label="关联账号id" align="center" prop="relevanceUserId" />-->
           <el-table-column label="安全编号" align="center" prop="code" />
           <el-table-column label="部门" align="center" prop="deptName" />
           <el-table-column label="职务" align="center" prop="positionName" />
           <el-table-column label="手机" align="center" prop="mobilePhone" />
           <el-table-column label="邮箱" align="center" prop="email" />
-          <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+          <el-table-column
+            label="操作"
+            align="center"
+            class-name="small-padding fixed-width"
+          >
             <template slot-scope="scope">
               <el-button
                 size="mini"
@@ -94,20 +117,22 @@
                 icon="el-icon-edit"
                 @click="handleUpdate(scope.row)"
                 v-hasPermi="['safetypeople:list:edit']"
-              >修改</el-button>
+                >修改</el-button
+              >
               <el-button
                 size="mini"
                 type="text"
                 icon="el-icon-delete"
                 @click="handleDelete(scope.row)"
                 v-hasPermi="['safetypeople:list:remove']"
-              >删除</el-button>
+                >删除</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
 
         <pagination
-          v-show="total>0"
+          v-show="total > 0"
           :total="total"
           :page.sync="queryParams.pageNum"
           :limit.sync="queryParams.pageSize"
@@ -120,17 +145,21 @@
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="150px">
         <el-row>
-        <el-form-item label="关联系统登录账号：" prop="relevanceUserId">
-          <el-select v-model="form.relevanceUserId"  placeholder="请选择"  style="width:100%">
-            <el-option
-              v-for="item in users"
-              :key="item.userId"
-              :label="item.userName"
-              :value="item.userId"
-              :disabled="item.status == 1"
-            ></el-option>
-          </el-select>
-        </el-form-item>
+          <el-form-item label="关联系统登录账号：" prop="relevanceUserId">
+            <el-select
+              v-model="form.relevanceUserId"
+              placeholder="请选择"
+              style="width: 100%"
+            >
+              <el-option
+                v-for="item in users"
+                :key="item.userId"
+                :label="item.userName"
+                :value="item.userId"
+                :disabled="item.status == 1"
+              ></el-option>
+            </el-select>
+          </el-form-item>
         </el-row>
         <el-form-item label="安全人员编号：" prop="safetyId">
           <el-input v-model="form.code" placeholder="请输入安全人员编号" />
@@ -139,16 +168,21 @@
           <el-input v-model="form.name" placeholder="请输入姓名" />
         </el-form-item>
         <el-form-item label="工作部门：" prop="deptId">
-          <treeselect v-model="form.deptId"
-                      :options="deptOptions"
-                      :disable-branch-nodes="true"
-                      :show-count="true"
-                      placeholder="请选择归属部门"
+          <treeselect
+            v-model="form.deptId"
+            :options="deptOptions"
+            :disable-branch-nodes="true"
+            :show-count="true"
+            placeholder="请选择归属部门"
           />
         </el-form-item>
         <el-form-item label="现任职务：" prop="positionId">
-<!--          <el-select v-model="form.positionId" multiple placeholder="请选择">-->
-          <el-select v-model="form.positionId"  placeholder="请选择"  style="width:100%">
+          <!--          <el-select v-model="form.positionId" multiple placeholder="请选择">-->
+          <el-select
+            v-model="form.positionId"
+            placeholder="请选择"
+            style="width: 100%"
+          >
             <el-option
               v-for="item in postOptions"
               :key="item.postId"
@@ -174,8 +208,24 @@
 </template>
 
 <script>
-import { getUser, listUser, addUser, updateUser, exportUser, resetUserPwd, changeUserStatus, importTemplate } from "@/api/system/user";
-import { listList, getList, delList, addList, updateList, exportList } from "@/api/safetypeople/list";
+import {
+  getUser,
+  listUser,
+  addUser,
+  updateUser,
+  exportUser,
+  resetUserPwd,
+  changeUserStatus,
+  importTemplate,
+} from "@/api/system/user";
+import {
+  listList,
+  getList,
+  delList,
+  addList,
+  updateList,
+  exportList,
+} from "@/api/safetypeople/list";
 import { treeselect } from "@/api/system/dept";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
@@ -230,50 +280,49 @@ export default {
       form: {},
       defaultProps: {
         children: "children",
-        label: "label"
+        label: "label",
       },
       // 表单校验
       rules: {
         code: [
-          { required: true, message: "安全员编号不能为空", trigger: "blur" }
+          { required: true, message: "安全员编号不能为空", trigger: "blur" },
         ],
         name: [
-          { required: true, message: "安全员姓名不能为空", trigger: "blur" }
+          { required: true, message: "安全员姓名不能为空", trigger: "blur" },
         ],
         mobilePhone: [
           { required: true, message: "手机号码不能为空", trigger: "blur" },
           {
             pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/,
             message: "请输入正确的手机号码",
-            trigger: "blur"
-          }
-        ]
-      }
+            trigger: "blur",
+          },
+        ],
+      },
     };
   },
   watch: {
     // 根据名称筛选部门树
     deptName(val) {
       this.$refs.tree.filter(val);
-    }
+    },
   },
   created() {
     this.getList();
     this.getTreeselect();
 
-    getUser().then(response => {
+    getUser().then((response) => {
       this.postOptions = response.posts;
     });
-    listUser().then (response => {
+    listUser().then((response) => {
       this.users = response.rows;
     });
-
   },
   methods: {
     /** 查询安全人员列表 */
     getList() {
       this.loading = true;
-      listList(this.queryParams).then(response => {
+      listList(this.queryParams).then((response) => {
         this.listList = response.rows;
         this.total = response.total;
         this.loading = false;
@@ -281,7 +330,7 @@ export default {
     },
     /** 查询部门下拉树结构 */
     getTreeselect() {
-      treeselect().then(response => {
+      treeselect().then((response) => {
         this.deptOptions = response.data;
       });
     },
@@ -331,13 +380,13 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.id);
-      this.single = selection.length!=1;
+      this.ids = selection.map((item) => item.id);
+      this.single = selection.length != 1;
       this.multiple = !selection.length;
     },
     /** 新增按钮操作 */
     handleAdd() {
-     /* getUser().then(response => {
+      /* getUser().then(response => {
         this.postOptions = response.posts;
       });
       listUser().then (response => {
@@ -346,26 +395,26 @@ export default {
       this.reset();
       this.getTreeselect();
       this.open = true;
-      this.title = "添加安全人员信息（*为必填项）"
+      this.title = "添加安全人员信息（*为必填项）";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
       this.getTreeselect();
 
-      const id = row.id || this.ids
-      getList(id).then(response => {
+      const id = row.id || this.ids;
+      getList(id).then((response) => {
         this.form = response.data;
         this.open = true;
         this.title = "修改安全人员";
       });
     },
     /** 提交按钮 */
-    submitForm: function() {
-      this.$refs["form"].validate(valid => {
+    submitForm: function () {
+      this.$refs["form"].validate((valid) => {
         if (valid) {
           if (this.form.id != undefined) {
-            updateList(this.form).then(response => {
+            updateList(this.form).then((response) => {
               if (response.code === 200) {
                 this.msgSuccess("修改成功");
                 this.open = false;
@@ -373,7 +422,7 @@ export default {
               }
             });
           } else {
-            addList(this.form).then(response => {
+            addList(this.form).then((response) => {
               if (response.code === 200) {
                 this.msgSuccess("新增成功");
                 this.open = false;
@@ -384,24 +433,27 @@ export default {
         }
       });
     },
-    rowClassName({row, rowIndex}) {
+    rowClassName({ row, rowIndex }) {
       //把每一行的索引放进row.id
-      row.order = rowIndex+1;
+      row.order = rowIndex + 1;
     },
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.order || this.ids;
       this.$confirm('是否确认删除序号为"' + ids + '"的数据项?', "警告", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning"
-        }).then(function() {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(function () {
           return delList(ids);
-        }).then(() => {
+        })
+        .then(() => {
           this.getList();
           this.msgSuccess("删除成功");
-        }).catch(function() {});
+        })
+        .catch(function () {});
     },
-  }
+  },
 };
 </script>
