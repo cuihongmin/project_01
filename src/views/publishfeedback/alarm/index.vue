@@ -107,7 +107,7 @@
       <el-table-column label="手机号码" align="center" prop="mobilePhone" />
       <el-table-column label="报警级别" align="center" prop="warnLevel" />
       <el-table-column label="报警内容" align="center" prop="content" />
-      <el-table-column label="发送状态" align="center" prop="sendState" />
+      <el-table-column label="发送状态" align="center" prop="sendState" :formatter="sendFormat"/>
       <el-table-column label="发送时间" align="center" prop="createTime" width="160">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createTime) }}</span>
@@ -511,6 +511,16 @@ export default {
       }
     },
 
+    /** 发送状态显示 */
+    sendFormat(row, column) {
+      if (row.sendState == 1) {
+        return '发送'
+      } else if (row.sendState == 0) {
+        return '发送失败'
+      } else if (row.sendState == 2){
+        return '未发送'
+      }
+    },
 
 
   },
