@@ -77,7 +77,7 @@
 
         <el-table v-loading="loading" :data="listList" :row-class-name="rowClassName" @selection-change="handleSelectionChange">
     <!--      <el-table-column label="id" align="center" prop="id" />-->
-          <el-table-column label="序号" align="center" prop="order" />
+
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column label="姓名" align="center" prop="name" />
 <!--          <el-table-column label="关联账号id" align="center" prop="relevanceUserId" />-->
