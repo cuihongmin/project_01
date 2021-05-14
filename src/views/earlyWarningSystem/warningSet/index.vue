@@ -122,28 +122,12 @@
     />
 
     <!-- 添加或修改定时任务对话框 -->
-    <el-dialog
+    <!-- <el-dialog
       title="选择预警执行动作（可多选）"
       :visible.sync="open"
       width="300px"
       append-to-body
     >
-      <!-- <div class="checkbox" v-if="alarList2">
-        
-        <el-checkbox label="弹窗报警" name="type"></el-checkbox>
-        <el-checkbox label="声音报警" name="type"></el-checkbox>
-        <el-checkbox
-          label="邮件报警"
-          v-model="checked"
-          name="type"
-        ></el-checkbox>
-        <el-checkbox
-          label="短信报警"
-          v-model="checked"
-          name="type"
-        ></el-checkbox>
-        <el-checkbox label="电话报警" name="type"></el-checkbox>
-      </div> -->
       <el-checkbox-group
         v-model="checkedCities"
         @change="handleCheckedCitiesChange"
@@ -161,8 +145,32 @@
         <el-button type="primary" @click="submitForm">保存</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
-    </el-dialog>
+    </el-dialog> -->
 
+    <!-- start----------------------------------- -->
+    <!-- start----------------------------------- -->
+    <el-dialog
+      title="选择预警执行动作（可多选）"
+      :visible.sync="open"
+      width="300px"
+      append-to-body
+    >
+      <el-table
+        v-loading="loading"
+        :data="dataList"
+        @selection-change="handleSelectionAlarmWay"
+      >
+        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column align="center" prop="name" />
+      </el-table>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitForm">保存</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
+    <!-- start----------------------------------- -->
+    <!-- start----------------------------------- -->
+    <!-- start----------------------------------- -->
     <!-- 任务日志详细 -->
     <el-dialog
       title="选择安全人员"
@@ -262,29 +270,23 @@
 
 <script>
 import {
-  listJob,
-  getJob,
-  delJob,
-  addJob,
-  updateJob,
-  exportJob,
-  runJob,
-  changeJobStatus,
-} from "@/api/monitor/job";
-import {
   warnConfigList,
   alarmWays,
   publishfeedbackAlarmwayList,
   safetyPeople,
   safetyPeopleSave,
+  executeWaySave,
 } from "@/api/warningSet/warningSet.js";
 
 export default {
   name: "Job",
   data() {
     return {
+      // 执行任务列表
+      alarwayId: [],
       peopleList: [],
       id: [],
+      // 获取分列表id集合
       ids: [],
       dataList: [],
       // 点击选择预警方式
@@ -316,6 +318,8 @@ export default {
       warnTypeOptions: [],
       // 状态字典
       warnLevelOptions: [],
+      // 选中的报警方式id列表
+      selectAlarmWayIds: [],
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -358,7 +362,7 @@ export default {
   },
   methods: {
     handleCheckedCitiesChange(value) {
-      console.log(value);
+      console.log("fffff", value);
     },
     /** 查询定时任务列表 */
     getList() {
@@ -441,12 +445,16 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      console.log(selection);
       this.ids = selection.map((item) => item.id);
       console.log(this.ids);
       this.single = selection.length != 1;
       this.multiple = !selection.length;
     },
+
+    handleSelectionAlarmWay(selection) {
+      this.selectAlarmWayIds = selection.map((item) => item.id);
+    },
+
     // 任务状态修改
     handleStatusChange(row) {
       let text = row.status === "0" ? "启用" : "停用";
@@ -471,13 +479,13 @@ export default {
     },
     /* 编辑执行操作 */
     handleRun(row) {
+      this.alarwayId = row.id;
       this.getPublishfeedbackAlarmwayList(row);
       this.getAlarmWays(row);
     },
     /** 任务详细信息 */
     handleView(row) {
       this.id = row.id;
-      console.log(this.id);
       safetyPeople(row.id).then((response) => {
         this.openView = true;
         this.peopleList = response.rows;
@@ -487,7 +495,7 @@ export default {
     submitSave() {
       let opt = {
         id: this.id,
-        peopleIds: this.ids,
+        peopleIds: this.ids.join(","),
       };
       console.log(opt);
       safetyPeopleSave(opt).then((response) => {
@@ -516,26 +524,13 @@ export default {
     },
     /** 提交按钮 */
     submitForm: function () {
-      this.$refs["form"].validate((valid) => {
-        if (valid) {
-          if (this.form.jobId != undefined) {
-            updateJob(this.form).then((response) => {
-              if (response.code === 200) {
-                this.msgSuccess("修改成功");
-                this.open = false;
-                this.getList();
-              }
-            });
-          } else {
-            addJob(this.form).then((response) => {
-              if (response.code === 200) {
-                this.msgSuccess("新增成功");
-                this.open = false;
-                this.getList();
-              }
-            });
-          }
-        }
+      let opt = {
+        id: this.alarwayId,
+        executeWaySave: this.ids.join(","),
+      };
+      console.log("执行提交", opt);
+      executeWaySave(opt).then((response) => {
+        console.log(response.rows);
       });
     },
     /** 删除按钮操作 */
