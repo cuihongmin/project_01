@@ -16,7 +16,7 @@
         <div class="head-container">
           <el-tree
             :data="deptOptions"
-            :props="defaultProps"
+          <el-input  :props="defaultProps"
             :expand-on-click-node="false"
             :filter-node-method="filterNode"
             ref="tree"
