@@ -117,6 +117,18 @@ export const constantRoutes = [
         meta: { title: '修改生成配置' }
       }
     ]
+  },
+  {
+    path: '/workflow',
+    component: Layout,
+    children: [
+      {
+        path: 'design/process/:id',
+        component: (resolve) => require(['@/views/plugin/workflow/design'], resolve),
+        name: 'WorkflowDesign',
+        meta: { title: '流程设计' }
+      }
+    ]
   }
 ]
 

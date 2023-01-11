@@ -1,5 +1,8 @@
 import { login, logout, getInfo } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
+import { setStore, getStore} from '@/utils/store'
+import { getButtons } from '@/api/user'
+
 
 const user = {
   state: {
@@ -7,7 +10,8 @@ const user = {
     name: '',
     avatar: '',
     roles: [],
-    permissions: []
+    permissions: [],
+    permission: getStore({name: 'permission'}) || {}
   },
 
   mutations: {
@@ -25,6 +29,30 @@ const user = {
     },
     SET_PERMISSIONS: (state, permissions) => {
       state.permissions = permissions
+    },
+    SET_PERMISSION: (state, permission) => {
+      let result = [];
+
+      function getCode(list) {
+        list.forEach(ele => {
+          if (typeof (ele) === 'object') {
+            const chiildren = ele.children;
+            const code = ele.code;
+            if (chiildren) {
+              getCode(chiildren)
+            } else {
+              result.push(code);
+            }
+          }
+        })
+      }
+
+      getCode(permission);
+      state.permission = {};
+      result.forEach(ele => {
+        state.permission[ele] = true;
+      });
+      setStore({name: 'permission', content: state.permission})
     }
   },
 
@@ -37,6 +65,9 @@ const user = {
       const uuid = userInfo.uuid
       return new Promise((resolve, reject) => {
         login(username, password, code, uuid).then(res => {
+          
+          console.log(res.token);
+         
           setToken(res.token)
           commit('SET_TOKEN', res.token)
           resolve()
@@ -50,6 +81,8 @@ const user = {
     GetInfo({ commit, state }) {
       return new Promise((resolve, reject) => {
         getInfo(state.token).then(res => {
+          console.log(res);
+          
           const user = res.user
           const avatar = user.avatar == "" ? require("@/assets/image/profile.jpg") : process.env.VUE_APP_BASE_API + user.avatar;
           if (res.roles && res.roles.length > 0) { // 验证返回的roles是否是一个非空数组
@@ -88,6 +121,18 @@ const user = {
         commit('SET_TOKEN', '')
         removeToken()
         resolve()
+      })
+    },
+
+    // 获取系统按钮
+    GetButtons({ commit }) {
+      return new Promise((reslove) => {
+        getButtons().then(res => {
+          const data = res.data;
+          commit('SET_PERMISSION', data);
+          reslove();
+        })
+        
       })
     }
   }
