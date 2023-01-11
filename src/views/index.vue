@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard-editor-container">
+  <div class="dashboard-editor-container">fahja发发发发发
 
     <panel-group @handleSetLineChartData="handleSetLineChartData" />
 
