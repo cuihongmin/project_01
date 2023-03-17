@@ -51,6 +51,9 @@
           >导入</el-button
         >
       </el-col>
+      <el-col :span="1.5">
+        <el-button size="mini" @click="handlePdf">导出PDF</el-button>
+      </el-col>
     </el-row>
     <!-- bpmn20.xml导入对话框 -->
     <!-- :visible.sync 表示弹框的显示隐藏，当:visible的值为ture的时候，弹框显示，当为false的时候，弹框隐藏 -->
@@ -98,6 +101,7 @@
 
 <script>
 import { getToken } from "@/utils/auth";
+import { exportPDF } from "@/api/flowable/member";
 export default {
   name: "Definition",
   components: {},
@@ -189,6 +193,39 @@ export default {
     // 提交上传文件
     submitFileForm() {
       this.$refs.upload.submit();
+    },
+    // 导出PDF
+    handlePdf() {
+      console.log("ooo");
+      window.location.href = "/dev-api/report/exportBusinessReport4PDF";
+      // this.download("asd");
+      // window.location.href = "/dev-api/report/exportBusinessReport4PDF.do";
+      // dow;
+      // exportPDF().then((response) => {
+      //   console.log("kkkk");
+
+      //   let pdfUrl = window.URL.createObjectURL(
+      //     new Blob([response], { type: "application/pdf" })
+      //   );
+      //   console.log(pdfUrl);
+      //   const link = document.createElement("a");
+      //   console.log(link);
+      //   link.href = pdfUrl;
+
+      //   // const blob = new Blob([response], { type: "application/pdf" });
+      //   // console.log(blob);
+      //   // const a = document.createElement("a");
+      //   // a.href = URL.createObjectURL(blob);
+      //   // let d = "report.pdf";
+      //   // a.download = `${d}.pdf`; // 这里填保存成的文件名
+      //   // a.click;
+      //   // URL.revokeObjectURL(a.href);
+      //   // a.remove;
+
+      //   // console.log(response);
+      //   // let uploadUrl = "report.pdf";
+      //   // this.download(response);
+      // });
     },
   },
 };

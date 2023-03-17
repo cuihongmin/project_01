@@ -12,7 +12,7 @@
           <raddar-chart />
         </div>
       </el-col>
-      <el-col :xs="24" :sm="24" :lg="8">
+      <el-col :xs="24" :sm="12" :lg="8">
         <div class="chart-wrapper">
           <pie-chart />
         </div>
@@ -68,7 +68,12 @@ export default {
   },
   methods: {
     handleSetLineChartData(type) {
+      console.log("7777");
+      console.log(type);
+      console.log("8888");
       this.lineChartData = lineChartData[type];
+      console.log("0000");
+      console.log(this.lineChartData);
     },
   },
 };
@@ -87,9 +92,9 @@ export default {
   }
 }
 
-@media (max-width: 1024px) {
-  .chart-wrapper {
-    padding: 8px;
-  }
-}
+// @media (max-width: 1024px) {
+//   .chart-wrapper {
+//     padding: 8px;
+//   }
+// }
 </style>

@@ -216,7 +216,7 @@ import {
   exportUser,
   resetUserPwd,
   changeUserStatus,
-  importTemplate
+  importTemplate,
 } from "@/api/system/user";
 import {
   listList,
@@ -224,7 +224,7 @@ import {
   delList,
   addList,
   updateList,
-  exportList
+  exportList,
 } from "@/api/safetypeople/list";
 import { treeselect } from "@/api/system/dept";
 import Treeselect from "@riophae/vue-treeselect";
@@ -274,47 +274,48 @@ export default {
         mobilePhone: undefined,
         email: undefined,
         modifyTime: undefined,
-        modifyBy: undefined
+        modifyBy: undefined,
       },
       // 表单参数
       form: {},
       defaultProps: {
         children: "children",
-        label: "label"
+        label: "label",
       },
       // 表单校验
       rules: {
         code: [
-          { required: true, message: "安全员编号不能为空", trigger: "blur" }
+          { required: true, message: "安全员编号不能为空", trigger: "blur" },
         ],
         name: [
-          { required: true, message: "安全员姓名不能为空", trigger: "blur" }
+          { required: true, message: "安全员姓名不能为空", trigger: "blur" },
         ],
         mobilePhone: [
           { required: true, message: "手机号码不能为空", trigger: "blur" },
           {
             pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/,
             message: "请输入正确的手机号码",
-            trigger: "blur"
-          }
-        ]
-      }
+            trigger: "blur",
+          },
+        ],
+      },
     };
   },
   watch: {
     // 根据名称筛选部门树
     deptName(val) {
+      console.log("llll");
       this.$refs.tree.filter(val);
-    }
+    },
   },
   created() {
     this.getList();
     this.getTreeselect();
 
-    getUser().then(response => {
+    getUser().then((response) => {
       this.postOptions = response.posts;
     });
-    listUser().then(response => {
+    listUser().then((response) => {
       this.users = response.rows;
     });
   },
@@ -322,7 +323,7 @@ export default {
     /** 查询安全人员列表 */
     getList() {
       this.loading = true;
-      listList(this.queryParams).then(response => {
+      listList(this.queryParams).then((response) => {
         this.listList = response.rows;
         this.total = response.total;
         this.loading = false;
@@ -330,7 +331,7 @@ export default {
     },
     /** 查询部门下拉树结构 */
     getTreeselect() {
-      treeselect().then(response => {
+      treeselect().then((response) => {
         this.deptOptions = response.data;
       });
     },
@@ -341,6 +342,8 @@ export default {
     },
     // 节点单击事件
     handleNodeClick(data) {
+      console.log("sssss");
+      console.log(data.id);
       this.queryParams.deptId = data.id;
       this.getList();
     },
@@ -364,7 +367,7 @@ export default {
         createTime: undefined,
         modifyTime: undefined,
         createBy: undefined,
-        modifyBy: undefined
+        modifyBy: undefined,
       };
       this.resetForm("form");
     },
@@ -380,7 +383,7 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.id);
+      this.ids = selection.map((item) => item.id);
       this.single = selection.length != 1;
       this.multiple = !selection.length;
     },
@@ -403,18 +406,18 @@ export default {
       this.getTreeselect();
 
       const id = row.id || this.ids;
-      getList(id).then(response => {
+      getList(id).then((response) => {
         this.form = response.data;
         this.open = true;
         this.title = "修改安全人员";
       });
     },
     /** 提交按钮 */
-    submitForm: function() {
-      this.$refs["form"].validate(valid => {
+    submitForm: function () {
+      this.$refs["form"].validate((valid) => {
         if (valid) {
           if (this.form.id != undefined) {
-            updateList(this.form).then(response => {
+            updateList(this.form).then((response) => {
               if (response.code === 200) {
                 this.msgSuccess("修改成功");
                 this.open = false;
@@ -422,7 +425,7 @@ export default {
               }
             });
           } else {
-            addList(this.form).then(response => {
+            addList(this.form).then((response) => {
               if (response.code === 200) {
                 this.msgSuccess("新增成功");
                 this.open = false;
@@ -443,17 +446,17 @@ export default {
       this.$confirm('是否确认删除序号为"' + ids + '"的数据项?', "警告", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
-        type: "warning"
+        type: "warning",
       })
-        .then(function() {
+        .then(function () {
           return delList(ids);
         })
         .then(() => {
           this.getList();
           this.msgSuccess("删除成功");
         })
-        .catch(function() {});
-    }
-  }
+        .catch(function () {});
+    },
+  },
 };
 </script>
