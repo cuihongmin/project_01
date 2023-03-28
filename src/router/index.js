@@ -129,7 +129,20 @@ export const constantRoutes = [
         meta: { title: '流程设计' }
       }
     ]
-  }
+  },
+  {
+    path: '/tooll',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: 'build/index',
+        component: () => import('@/views/tooll/build/index'),
+        name: 'FormBuild',
+        meta: { title: '表单设计', icon: '' }
+      }
+    ]
+  },
 ]
 
 export default new Router({

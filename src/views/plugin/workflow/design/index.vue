@@ -95,12 +95,12 @@ import { fullscreenToggel } from "@/utils/util";
 import { getList as formList } from "@/api/plugin/workflow/form";
 import { mapGetters } from "vuex";
 // 引入相关的bpmn的依赖
-import BpmnModeler from "bpmn-js/lib/Modeler";
-import "bpmn-js/dist/assets/diagram-js.css";
-import "bpmn-js/dist/assets/bpmn-font/css/bpmn.css";
-import "bpmn-js/dist/assets/bpmn-js.css";
-import "bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css";
-import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
+// import BpmnModeler from "bpmn-js/lib/Modeler";
+// import "bpmn-js/dist/assets/diagram-js.css";
+// import "bpmn-js/dist/assets/bpmn-font/css/bpmn.css";
+// import "bpmn-js/dist/assets/bpmn-js.css";
+// import "bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css";
+// import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 // import "bpmn-js-properties-panel/dist/assetselement-templates.css";
 import "bpmn-js-properties-panel/dist/assets/bpmn-js-properties-panel.css"; // 右边工具栏样式
 

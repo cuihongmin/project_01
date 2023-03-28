@@ -272,6 +272,15 @@ function attrBuilder(el) {
   }
 }
 
+// el-buttin 子级
+function buildElButtonChild(conf) {
+  const children = []
+  if (conf.default) {
+    children.push(conf.default)
+  }
+  return children.join('\n')
+}
+
 // el-input innerHTML
 function buildElInputChild(conf) {
   const children = []
