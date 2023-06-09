@@ -55,6 +55,19 @@
         <el-button size="mini" @click="handlePdf">导出PDF</el-button>
       </el-col>
     </el-row>
+    <el-row :gutter="10">
+      <el-button @click="drawer = true" type="primary" style="margin-left: 16px;">
+      点我打开
+      </el-button>
+     <el-drawer
+      title="我是标题"
+      :visible.sync="drawer"
+      direction="rtl"
+      class="drawer-title"
+      >
+      <span>我来啦!lll</span>
+     </el-drawer>
+    </el-row>
     <!-- bpmn20.xml导入对话框 -->
     <!-- :visible.sync 表示弹框的显示隐藏，当:visible的值为ture的时候，弹框显示，当为false的时候，弹框隐藏 -->
     <el-dialog
@@ -107,6 +120,8 @@ export default {
   components: {},
   data() {
     return {
+      drawer: false,
+      direction: 'rtl',
       // 显示搜索条件
       showSearch: true,
       // bpmn.xml 导入
@@ -147,6 +162,14 @@ export default {
     };
   },
   methods: {
+     handleClose(done) {
+      console.log("sssss");
+        this.$confirm('确认关闭？')
+          .then(_ => {
+            done();
+          })
+          .catch(_ => {});
+      },
     // 表单重置
     reset() {
       this.form = {
@@ -229,4 +252,7 @@ export default {
     },
   },
 };
-</script>
+</script >
+<style  scoped>
+ 
+</style>
