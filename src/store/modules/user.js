@@ -134,7 +134,20 @@ const user = {
         })
         
       })
+    },
+
+    //人脸识别登录
+    Facelogin({commit}, formData) {
+      const file = formData.file;
+      const groupId = formData.groupId;
+      return new Promise((resolve, reject) => {
+        Facelogin(file,groupId).then(res => {
+          console.log(res);
+
+        })
+      })
     }
+
   }
 }
 
